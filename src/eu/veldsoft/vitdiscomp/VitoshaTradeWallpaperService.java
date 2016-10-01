@@ -174,8 +174,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
 							new Rect(0, 0, width - 1, height - 1), null);
 
-					// TODO Draw ANN info!!!
-
 					/*
 					 * Panels.
 					 */
@@ -207,6 +205,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 						canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
 						x++;
 					}
+					
+					// TODO Draw ANN info!!!
 				}
 			} finally {
 				if (canvas != null) {
