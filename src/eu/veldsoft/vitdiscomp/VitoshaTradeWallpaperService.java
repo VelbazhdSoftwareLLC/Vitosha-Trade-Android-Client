@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
+import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -125,13 +126,20 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		private final Runnable trainer = new Runnable() {
 			@Override
 			public void run() {
+				draw();
 				train();
 				predict();
-				draw();
 			}
 		};
 
 		private void train() {
+			if(network == null) {
+				return;
+			}
+			if(examples == null) {
+				return;
+			}
+			
 			train = new ResilientPropagation(network, examples);
 			long start = System.currentTimeMillis();
 			do {
@@ -143,6 +151,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		private void predict() {
+			if(forecast == null) {
+				return;
+			}
+			
 			output = network.compute(forecast);
 		}
 
