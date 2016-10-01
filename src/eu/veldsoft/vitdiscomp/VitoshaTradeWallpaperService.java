@@ -1,11 +1,19 @@
 package eu.veldsoft.vitdiscomp;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.ml.data.MLData;
+import org.encog.ml.data.MLDataPair;
+import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.basic.BasicMLData;
+import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -15,7 +23,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 public class VitoshaTradeWallpaperService extends WallpaperService {
@@ -36,29 +43,109 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static Bitmap images[] = null;
 
 	private static BasicNetwork network = new BasicNetwork();
+
+	private static MLDataSet examples = null;
+
+	private static MLData forecast = null;
+
+	private static MLData output = null;
+
+	private static ResilientPropagation train = null;
+
 	static {
 		// TODO Load ANN structure from the remote server.
+		Map<Integer, Integer> counters = new HashMap<Integer, Integer>();
+		counters.put(InputData.REGULAR, 0);
+		counters.put(InputData.BIAS, 0);
+		counters.put(InputData.INPUT, 0);
+		counters.put(InputData.OUTPUT, 0);
 
-		int inputSize = 0;
-		int hiddenSize = 0;
-		int outputSize = 0;
+		for (int type : InputData.NEURONS) {
+			counters.put(type, counters.get(type) + 1);
+		}
 
-		network.addLayer(new BasicLayer(null, true, inputSize));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, hiddenSize));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, outputSize));
+		int inputSize = counters.get(InputData.INPUT);
+		int hiddenSize = counters.get(InputData.REGULAR);
+		int outputSize = counters.get(InputData.OUTPUT);
+
+		/*
+		 * Network construction.
+		 */
+		network.addLayer(new BasicLayer(null, true, counters.get(InputData.INPUT)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters.get(InputData.REGULAR)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, counters.get(InputData.OUTPUT)));
 		network.getStructure().finalizeStructure();
 		network.reset();
+
+		// TODO Load weights to the network.
+
+		double values[] = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
+
+		/*
+		 * Normalize data.
+		 */
+		double min = values[0];
+		double max = values[0];
+		for (double value : values) {
+			if (value < min) {
+				min = value;
+			}
+			if (value > max) {
+				max = value;
+			}
+		}
+
+		/*
+		 * Prepare training set.
+		 */
+		double input[][] = new double[values.length - (inputSize + outputSize)][inputSize];
+		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
+		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
+			for (int j = 0; j < inputSize; j++) {
+				input[i][j] = 0.1 + 0.8 * (values[i + j] - min) / (max - min);
+			}
+			for (int j = 0; j < outputSize; j++) {
+				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min) / (max - min);
+			}
+		}
+		examples = new BasicMLDataSet(input, target);
+
+		/*
+		 * Prepare forecast set.
+		 */
+		input = new double[1][inputSize];
+		for (int j = 0; j < inputSize; j++) {
+			input[0][j] = 0.1 + 0.8 * (values[values.length - inputSize + j] - min) / (max - min);
+		}
+		forecast = new BasicMLData(input[0]);
 	}
 
 	private class WallpaperEngine extends Engine {
 		private final Handler handler = new Handler();
 
-		private final Runnable drawer = new Runnable() {
+		private final Runnable trainer = new Runnable() {
 			@Override
 			public void run() {
+				train();
+				predict();
 				draw();
 			}
 		};
+
+		private void train() {
+			train = new ResilientPropagation(network, examples);
+			long start = System.currentTimeMillis();
+			do {
+				train.iteration();
+				// TODO Training is done one tenth of the weak up time,
+				// but better way should be found for this parameter.
+			} while (System.currentTimeMillis() - start < delay / 10);
+			train.finishTraining();
+		}
+
+		private void predict() {
+			output = network.compute(forecast);
+		}
 
 		private void draw() {
 			if (images == null) {
@@ -77,7 +164,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				if (canvas != null) {
 					canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
 							new Rect(0, 0, width - 1, height - 1), null);
-					// TODO Draw ANN info.
+					// TODO Draw ANN info!!!
 				}
 			} finally {
 				if (canvas != null) {
@@ -85,9 +172,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				}
 			}
 
-			handler.removeCallbacks(drawer);
+			handler.removeCallbacks(trainer);
 			if (visible == true) {
-				handler.postDelayed(drawer, delay);
+				handler.postDelayed(trainer, delay);
 			}
 		}
 
@@ -101,7 +188,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			left = Integer.parseInt(preferences.getString("left_corner", "0"));
 			delay = Long.parseLong(preferences.getString("loading", "" + 86400000));
 
-			handler.post(drawer);
+			handler.post(trainer);
 		}
 
 		@Override
@@ -109,9 +196,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			VitoshaTradeWallpaperService.this.visible = visible;
 
 			if (visible == true) {
-				handler.post(drawer);
+				handler.post(trainer);
 			} else {
-				handler.removeCallbacks(drawer);
+				handler.removeCallbacks(trainer);
 			}
 		}
 
@@ -119,7 +206,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		public void onSurfaceDestroyed(SurfaceHolder holder) {
 			super.onSurfaceDestroyed(holder);
 			VitoshaTradeWallpaperService.this.visible = false;
-			handler.removeCallbacks(drawer);
+			handler.removeCallbacks(trainer);
 		}
 
 		@Override

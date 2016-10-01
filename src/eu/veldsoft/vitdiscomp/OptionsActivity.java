@@ -8,9 +8,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.SwitchPreference;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 public class OptionsActivity extends PreferenceActivity {
 
