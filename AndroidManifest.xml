@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="15"
-        android:targetSdkVersion="21" />
+        android:minSdkVersion="21"
+        android:targetSdkVersion="23" />
 
     <uses-feature
         android:name="android.software.live_wallpaper"
@@ -33,6 +33,17 @@
                 android:resource="@xml/vitosha_trade_wallpaper" >
             </meta-data>
         </service>
+
+        <activity
+            android:name=".OptionsActivity"
+            android:label="@string/title_activity_options"
+            android:noHistory="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

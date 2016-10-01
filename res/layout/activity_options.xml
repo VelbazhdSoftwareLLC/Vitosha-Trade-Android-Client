@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ListPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/loadings_keys"
+        android:entryValues="@array/loadings_values"
+        android:key="loading"
+        android:persistent="true"
+        android:title="@string/loading_title" />
+
+    <EditTextPreference
+        android:defaultValue="0"
+        android:dialogTitle="Top"
+        android:inputType="number"
+        android:key="top_corner"
+        android:maxLines="1"
+        android:persistent="true"
+        android:title="Top Corner" />
+
+    <EditTextPreference
+        android:defaultValue="0"
+        android:dialogTitle="Left"
+        android:inputType="number"
+        android:key="left_corner"
+        android:maxLines="1"
+        android:persistent="true"
+        android:title="Left Corner" />
+    
+    <SwitchPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:defaultValue="false"
+        android:key="set_wallpaper"
+        android:title="@string/set_wallpaper_title" />
+
+</PreferenceScreen>

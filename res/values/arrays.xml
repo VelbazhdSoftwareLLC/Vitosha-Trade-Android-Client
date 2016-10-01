@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="loadings_keys">
+        <item name="very_low">Very Low</item>
+        <item name="low">Low</item>
+        <item name="normal">Normal</item>
+        <item name="high">High</item>
+        <item name="very_high">Very High</item>
+    </string-array>
+    <string-array name="loadings_values">
+        <item name="very_low">14400000</item>
+        <item name="low">7200000</item>
+        <item name="normal">3600000</item>
+        <item name="high">1800000</item>
+        <item name="very_high">600000</item>
+    </string-array>
+
+</resources>

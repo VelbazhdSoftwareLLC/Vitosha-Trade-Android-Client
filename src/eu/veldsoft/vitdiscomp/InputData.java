@@ -7,6 +7,11 @@ package eu.veldsoft.vitdiscomp;
  * @author Todor Balabanov
  */
 public class InputData {
+	static final int REGULAR = 0x00;
+	static final int BIAS = 0x01;
+	static final int INPUT = 0x02;
+	static final int OUTPUT = 0x04;
+
 	public static final String SYMBOL = "SIN";
 	public static final int PERIOD = 1;
 	public static final double TIME[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
