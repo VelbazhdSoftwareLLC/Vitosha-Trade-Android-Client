@@ -32,18 +32,18 @@ public class OptionsActivity extends PreferenceActivity {
 							// TODO Remove our wall paper.
 							return true;
 						}
-						
-						//TODO Select random clip area.
+
+						// TODO Select random clip area.
 
 						Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
 						intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
 								new ComponentName(OptionsActivity.this, VitoshaTradeWallpaperService.class));
 						startActivity(intent);
 
-						((SwitchPreference)preference).setChecked(false);
-						
+						((SwitchPreference) preference).setChecked(false);
+
 						OptionsActivity.this.finish();
-						
+
 						return true;
 					}
 				});
