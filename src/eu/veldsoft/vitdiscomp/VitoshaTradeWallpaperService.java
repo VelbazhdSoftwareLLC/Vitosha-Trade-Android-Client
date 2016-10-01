@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -19,6 +18,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -26,6 +27,8 @@ import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
 public class VitoshaTradeWallpaperService extends WallpaperService {
+	private static final double TRAINING_TIME_PERCENT_FROM_DELAY = 1D;
+
 	private static final Random PRNG = new Random();
 
 	private static int top = 0;
@@ -126,35 +129,35 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		private final Runnable trainer = new Runnable() {
 			@Override
 			public void run() {
+				predict();
 				draw();
 				train();
-				predict();
 			}
 		};
 
 		private void train() {
-			if(network == null) {
+			if (network == null) {
 				return;
 			}
-			if(examples == null) {
+			if (examples == null) {
 				return;
 			}
-			
-			train = new ResilientPropagation(network, examples);
-			long start = System.currentTimeMillis();
-			do {
-				train.iteration();
-				// TODO Training is done one tenth of the weak up time,
-				// but better way should be found for this parameter.
-			} while (System.currentTimeMillis() - start < delay / 10);
-			train.finishTraining();
+
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					train = new ResilientPropagation(network, examples);
+					train.iteration();
+					train.finishTraining();
+				}
+			});
 		}
 
 		private void predict() {
-			if(forecast == null) {
+			if (forecast == null) {
 				return;
 			}
-			
+
 			output = network.compute(forecast);
 		}
 
@@ -175,7 +178,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				if (canvas != null) {
 					canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
 							new Rect(0, 0, width - 1, height - 1), null);
+
 					// TODO Draw ANN info!!!
+
+					Paint paint = new Paint();
+					paint.setColor(Color.argb(63, 0, 0, 0));
+					canvas.drawRect(width / 2 - 50, height / 2 - 160, width / 2 + 50, height / 2 - 60, paint);
+					canvas.drawRect(width / 2 - 50, height / 2 - 50, width / 2 + 50, height / 2 + 50, paint);
+					canvas.drawRect(width / 2 - 50, height / 2 + 60, width / 2 + 50, height / 2 + 160, paint);
+
+					paint.setColor(Color.argb(95, 255, 255, 255));
+					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40, height / 2 - 140, paint);
+					canvas.drawText("" + InputData.PERIOD, width / 2 - 40, height / 2 - 120, paint);
 				}
 			} finally {
 				if (canvas != null) {

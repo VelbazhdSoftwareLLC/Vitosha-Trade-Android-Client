@@ -6,6 +6,7 @@
     <ListPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:defaultValue="14400000"
         android:entries="@array/loadings_keys"
         android:entryValues="@array/loadings_values"
         android:key="loading"
@@ -29,7 +30,7 @@
         android:maxLines="1"
         android:persistent="true"
         android:title="Left Corner" />
-    
+
     <SwitchPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
