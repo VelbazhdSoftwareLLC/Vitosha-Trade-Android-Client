@@ -143,14 +143,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				return;
 			}
 
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					train = new ResilientPropagation(network, examples);
-					train.iteration();
-					train.finishTraining();
-				}
-			});
+			train = new ResilientPropagation(network, examples);
+			train.iteration();
+			train.finishTraining();
 		}
 
 		private void predict() {
@@ -181,15 +176,37 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 					// TODO Draw ANN info!!!
 
+					/*
+					 * Panels.
+					 */
 					Paint paint = new Paint();
 					paint.setColor(Color.argb(63, 0, 0, 0));
 					canvas.drawRect(width / 2 - 50, height / 2 - 160, width / 2 + 50, height / 2 - 60, paint);
 					canvas.drawRect(width / 2 - 50, height / 2 - 50, width / 2 + 50, height / 2 + 50, paint);
 					canvas.drawRect(width / 2 - 50, height / 2 + 60, width / 2 + 50, height / 2 + 160, paint);
 
+					/*
+					 * Time series info.
+					 */
 					paint.setColor(Color.argb(95, 255, 255, 255));
 					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40, height / 2 - 140, paint);
 					canvas.drawText("" + InputData.PERIOD, width / 2 - 40, height / 2 - 120, paint);
+
+					/*
+					 * Forecast.
+					 */
+					int x = width / 2 - 50;
+					int y = height / 2 + 50;
+					paint.setColor(Color.argb(95, 0, 255, 0));
+					for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
+						canvas.drawLine(x, y, x, y - (int) (forecast.getData()[i] * 100D), paint);
+						x++;
+					}
+					paint.setColor(Color.argb(95, 255, 0, 0));
+					for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
+						canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
+						x++;
+					}
 				}
 			} finally {
 				if (canvas != null) {
