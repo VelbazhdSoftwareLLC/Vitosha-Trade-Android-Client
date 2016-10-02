@@ -179,16 +179,16 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					 */
 					Paint paint = new Paint();
 					paint.setColor(Color.argb(63, 0, 0, 0));
-					canvas.drawRect(width / 2 - 50, height / 2 - 160, width / 2 + 50, height / 2 - 60, paint);
 					canvas.drawRect(width / 2 - 50, height / 2 - 50, width / 2 + 50, height / 2 + 50, paint);
 					canvas.drawRect(width / 2 - 50, height / 2 + 60, width / 2 + 50, height / 2 + 160, paint);
 
 					/*
 					 * Time series info.
 					 */
+					paint.setTextSize(20);
 					paint.setColor(Color.argb(95, 255, 255, 255));
-					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40, height / 2 - 140, paint);
-					canvas.drawText("" + InputData.PERIOD, width / 2 - 40, height / 2 - 120, paint);
+					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40, height / 2 - 130, paint);
+					canvas.drawText("" + InputData.PERIOD, width / 2 - 40, height / 2 - 100, paint);
 
 					/*
 					 * Forecast.
@@ -197,13 +197,17 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					int y = height / 2 + 50;
 					paint.setColor(Color.argb(95, 0, 255, 0));
 					for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
-						canvas.drawLine(x, y, x, y - (int) (forecast.getData()[i] * 100D), paint);
-						x++;
+						for (int g = 0; g < 6; g++) {
+							canvas.drawLine(x, y, x, y - (int) (forecast.getData()[i] * 100D), paint);
+							x++;
+						}
 					}
 					paint.setColor(Color.argb(95, 255, 0, 0));
 					for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
-						canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
-						x++;
+						for (int g = 0; g < 6; g++) {
+							canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
+							x++;
+						}
 					}
 
 					/*
@@ -279,14 +283,17 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					 */
 					int colors[] = { Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
 							Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
-					for (x = width / 2 - 2, k = 0; x <= width / 2 + 2; x++, k++) {
-						for (y = height / 2 + 60, l = 0; y <= height / 2 + 160 && l < topology[k].length; y++, l++) {
-							paint.setColor(colors[k]);
-							paint.setColor(
-									Color.argb(Color.alpha(colors[k]), (int) (Color.red(colors[k]) * topology[k][l]),
-											(int) (Color.green(colors[k]) * topology[k][l]),
-											(int) (Color.blue(colors[k]) * topology[k][l])));
-							canvas.drawPoint(x, y, paint);
+					for (x = width / 2 - 50, k = 0; x < width / 2 + 50; x += 20, k++) {
+						for (int g = 0; g < 20; g++) {
+							for (y = height / 2 + 110 - topology[k].length / 2, l = 0; y < height / 2 + 160
+									&& l < topology[k].length; y++, l++) {
+								paint.setColor(colors[k]);
+								paint.setColor(Color.argb(Color.alpha(colors[k]),
+										(int) (Color.red(colors[k]) * topology[k][l]),
+										(int) (Color.green(colors[k]) * topology[k][l]),
+										(int) (Color.blue(colors[k]) * topology[k][l])));
+								canvas.drawPoint(x + g, y, paint);
+							}
 						}
 					}
 				}
