@@ -13,23 +13,25 @@
         android:persistent="true"
         android:title="@string/loading_title" />
 
-    <EditTextPreference
-        android:defaultValue="0"
-        android:dialogTitle="Top"
-        android:inputType="number"
-        android:key="top_corner"
-        android:maxLines="1"
-        android:persistent="true"
-        android:title="Top Corner" />
+<!--     <EditTextPreference -->
+<!--         android:defaultValue="0" -->
+<!--         android:dialogTitle="Top" -->
+<!--         android:inputType="number" -->
+<!--         android:key="top_corner" -->
+<!--         android:maxLines="1" -->
+<!--         android:persistent="true" -->
+<!--         android:title="Top Corner" -->
+<!--         android:visibility="gone" /> -->
 
-    <EditTextPreference
-        android:defaultValue="0"
-        android:dialogTitle="Left"
-        android:inputType="number"
-        android:key="left_corner"
-        android:maxLines="1"
-        android:persistent="true"
-        android:title="Left Corner" />
+<!--     <EditTextPreference -->
+<!--         android:defaultValue="0" -->
+<!--         android:dialogTitle="Left" -->
+<!--         android:inputType="number" -->
+<!--         android:key="left_corner" -->
+<!--         android:maxLines="1" -->
+<!--         android:persistent="true" -->
+<!--         android:title="Left Corner" -->
+<!--         android:visibility="gone" /> -->
 
     <SwitchPreference
         android:layout_width="fill_parent"

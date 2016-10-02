@@ -205,8 +205,90 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 						canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
 						x++;
 					}
-					
-					// TODO Draw ANN info!!!
+
+					/*
+					 * Artificial neural network.
+					 */
+					int k = 0;
+					int l = 0;
+					double topology[][] = { forecast.getData(),
+							new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
+							new double[network.getLayerNeuronCount(1)],
+							new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
+							output.getData() };
+					for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
+						if (n >= network.getLayerNeuronCount(1)) {
+							n = 0;
+							m++;
+						}
+						if (m >= network.getLayerNeuronCount(0)) {
+							m = 0;
+						}
+						topology[1][i] = network.getWeight(0, m, n);
+						n++;
+					}
+					for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
+						if (n >= network.getLayerNeuronCount(2)) {
+							n = 0;
+							m++;
+						}
+						if (m >= network.getLayerNeuronCount(1)) {
+							m = 0;
+						}
+						topology[3][i] = network.getWeight(1, m, n);
+						n++;
+					}
+
+					/*
+					 * Hidden layer values.
+					 */
+					for (int i = 0; i < network.getLayerNeuronCount(1); i++) {
+						topology[2][i] = network.getLayerOutput(1, i);
+					}
+
+					/*
+					 * Normalize weights.
+					 */
+					double min = Double.MAX_VALUE;
+					double max = Double.MIN_VALUE;
+					for (double value : topology[1]) {
+						if (value < min) {
+							min = value;
+						}
+						if (value > max) {
+							max = value;
+						}
+					}
+					for (double value : topology[3]) {
+						if (value < min) {
+							min = value;
+						}
+						if (value > max) {
+							max = value;
+						}
+					}
+					for (int i = 0; i < topology[1].length; i++) {
+						topology[1][i] = (topology[1][i] - min) / (max - min);
+					}
+					for (int i = 0; i < topology[3].length; i++) {
+						topology[3][i] = (topology[3][i] - min) / (max - min);
+					}
+
+					/*
+					 * Draw topology.
+					 */
+					int colors[] = { Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
+							Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
+					for (x = width / 2 - 2, k = 0; x <= width / 2 + 2; x++, k++) {
+						for (y = height / 2 + 60, l = 0; y <= height / 2 + 160 && l < topology[k].length; y++, l++) {
+							paint.setColor(colors[k]);
+							paint.setColor(
+									Color.argb(Color.alpha(colors[k]), (int) (Color.red(colors[k]) * topology[k][l]),
+											(int) (Color.green(colors[k]) * topology[k][l]),
+											(int) (Color.blue(colors[k]) * topology[k][l])));
+							canvas.drawPoint(x, y, paint);
+						}
+					}
 				}
 			} finally {
 				if (canvas != null) {

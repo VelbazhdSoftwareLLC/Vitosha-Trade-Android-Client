@@ -30,7 +30,7 @@ public class OptionsActivity extends PreferenceActivity {
 
 						if (((Boolean) value) == false) {
 							// TODO Remove our wall paper.
-							return true;
+							return false;
 						} else {
 							((SwitchPreference) preference).setChecked(false);
 						}
@@ -42,7 +42,7 @@ public class OptionsActivity extends PreferenceActivity {
 
 						OptionsActivity.this.finish();
 
-						return true;
+						return false;
 					}
 				});
 	}
