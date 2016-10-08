@@ -23,7 +23,7 @@
     <ListPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:defaultValue="0 0"
+        android:defaultValue="cc"
         android:entries="@array/positions_keys"
         android:entryValues="@array/positions_values"
         android:key="positioning"

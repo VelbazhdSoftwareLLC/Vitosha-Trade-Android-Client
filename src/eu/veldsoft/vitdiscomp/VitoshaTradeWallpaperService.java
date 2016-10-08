@@ -30,7 +30,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static final double TRAINING_TIME_PERCENT_FROM_DELAY = 1D;
 
 	private static final int GAP_BETWEEN_PANELS = 10;
-	
+
+	private static final int PANEL_BACKGROUND_COLOR = Color.argb(63, 0, 0, 0);
+
+	private static final int PANEL_TEXT_COLOR = Color.argb(95, 255, 255, 255);
+
 	private static final Random PRNG = new Random();
 
 	private static long delay = 0;
@@ -172,15 +176,26 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			SurfaceHolder holder = getSurfaceHolder();
 			Canvas canvas = null;
 
-			Bitmap image = images[Calendar.getInstance().get(
-					Calendar.DAY_OF_YEAR)
-					% images.length];
-			int left = PRNG.nextInt(image.getWidth() - width);
-			int top = PRNG.nextInt(image.getHeight() - height);
-
 			try {
 				canvas = holder.lockCanvas();
+
 				if (canvas != null) {
+					/*
+					 * Change picture according the day in the year.
+					 */
+					Bitmap image = images[Calendar.getInstance().get(
+							Calendar.DAY_OF_YEAR)
+							% images.length];
+
+					/*
+					 * Select random top-left corner for image clip.
+					 */
+					int left = PRNG.nextInt(image.getWidth() - width);
+					int top = PRNG.nextInt(image.getHeight() - height);
+
+					/*
+					 * Clip part of the image.
+					 */
 					canvas.drawBitmap(image, new Rect(left, top, left + width
 							- 1, top + height - 1), new Rect(0, 0, width - 1,
 							height - 1), null);
@@ -189,27 +204,27 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					 * Panels.
 					 */
 					Paint paint = new Paint();
-					paint.setColor(Color.argb(63, 0, 0, 0));
-					canvas.drawRect(width / 2 - 50, height / 2 - 50,
-							width / 2 + 50, height / 2 + 50, paint);
-					canvas.drawRect(width / 2 - 50, height / 2 + 60,
-							width / 2 + 50, height / 2 + 160, paint);
+					paint.setColor(PANEL_BACKGROUND_COLOR);
+					for (Rect rectangle : panels) {
+						canvas.drawRect(rectangle, paint);
+					}
 
 					/*
 					 * Time series info.
 					 */
-					paint.setTextSize(20);
-					paint.setColor(Color.argb(95, 255, 255, 255));
-					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40,
-							height / 2 - 130, paint);
-					canvas.drawText("" + InputData.PERIOD, width / 2 - 40,
-							height / 2 - 100, paint);
+					int textSize = panelsSideSize / 5;
+					paint.setTextSize(textSize);
+					paint.setColor(PANEL_TEXT_COLOR);
+					canvas.drawText("" + InputData.SYMBOL, panels[0].left
+							+ textSize, panels[0].bottom - 3 * textSize, paint);
+					canvas.drawText("" + InputData.PERIOD, panels[0].left
+							+ textSize, panels[0].bottom - textSize, paint);
 
 					/*
 					 * Forecast.
 					 */
-					int x = width / 2 - 50;
-					int y = height / 2 + 50;
+					int x = panels[1].left;
+					int y = panels[1].bottom;
 					paint.setColor(Color.argb(95, 0, 255, 0));
 					for (int i = 0; forecast.getData() != null
 							&& i < forecast.getData().length; i++) {
@@ -310,9 +325,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 							Color.argb(95, 0, 0, 255),
 							Color.argb(95, 255, 255, 255),
 							Color.argb(95, 255, 0, 0) };
-					for (x = width / 2 - 50, k = 0; x < width / 2 + 50; x += 20, k++) {
-						for (int g = 0; g < 20; g++) {
-							for (y = height / 2 + 110 - topology[k].length / 2, l = 0; y < height / 2 + 160
+					for (x = panels[2].left, k = 0; k < colors.length; x += panelsSideSize / 5, k++) {
+						for (int g = 0; g < panelsSideSize / 5; g++) {
+							for (y = panels[2].top, l = 0; y < panels[2].bottom
 									&& l < topology[k].length; y++, l++) {
 								paint.setColor(colors[k]);
 								paint.setColor(Color.argb(
@@ -375,37 +390,173 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			panelsSideSize = Integer.parseInt(preferences.getString("sizing",
 					"100"));
 			switch (preferences.getString("positioning", "0 0")) {
-			case "-1 -1":
+			case "lt":
+				panels[0].left = GAP_BETWEEN_PANELS;
+				panels[0].top = GAP_BETWEEN_PANELS;
+				panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+				panels[1].left = GAP_BETWEEN_PANELS;
+				panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+				panels[2].left = GAP_BETWEEN_PANELS;
+				panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+				panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
 				break;
-			case "0 -1":
-				break;
-			case "+1 -1":
-				break;
-			case "-1 0":
-				break;
-			case "0 0":
+			case "ct":
 				panels[0].left = width / 2 - panelsSideSize / 2;
-				panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].top = GAP_BETWEEN_PANELS;
 				panels[0].right = width / 2 + panelsSideSize / 2;
-				panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
-				
+				panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+				panels[1].left = width / 2 - panelsSideSize / 2;
+				panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].right = width / 2 + panelsSideSize / 2;
+				panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+				panels[2].left = width / 2 - panelsSideSize / 2;
+				panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+				panels[2].right = width / 2 + panelsSideSize / 2;
+				panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
+				break;
+			case "rt":
+				panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[0].top = GAP_BETWEEN_PANELS;
+				panels[0].right = width - GAP_BETWEEN_PANELS;
+				panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+				panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].right = width - GAP_BETWEEN_PANELS;
+				panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+				panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+				panels[2].right = width - GAP_BETWEEN_PANELS;
+				panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
+				break;
+			case "lc":
+				panels[0].left = GAP_BETWEEN_PANELS;
+				panels[0].top = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[0].bottom = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS;
+
+				panels[1].left = GAP_BETWEEN_PANELS;
+				panels[1].top = height / 2 - panelsSideSize / 2;
+				panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].bottom = height / 2 + panelsSideSize / 2;
+
+				panels[2].left = GAP_BETWEEN_PANELS;
+				panels[2].top = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS;
+				panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				break;
+			case "cc":
+				panels[0].left = width / 2 - panelsSideSize / 2;
+				panels[0].top = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].right = width / 2 + panelsSideSize / 2;
+				panels[0].bottom = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS;
+
 				panels[1].left = width / 2 - panelsSideSize / 2;
 				panels[1].top = height / 2 - panelsSideSize / 2;
 				panels[1].right = width / 2 + panelsSideSize / 2;
 				panels[1].bottom = height / 2 + panelsSideSize / 2;
-				
+
+				panels[2].left = width / 2 - panelsSideSize / 2;
+				panels[2].top = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS;
+				panels[2].right = width / 2 + panelsSideSize / 2;
+				panels[2].bottom = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				break;
+			case "rc":
+				panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[0].top = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].right = width - GAP_BETWEEN_PANELS;
+				panels[0].bottom = height / 2 - panelsSideSize / 2
+						- GAP_BETWEEN_PANELS;
+
+				panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[1].top = height / 2 - panelsSideSize / 2;
+				panels[1].right = width - GAP_BETWEEN_PANELS;
+				panels[1].bottom = height / 2 + panelsSideSize / 2;
+
+				panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[2].top = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS;
+				panels[2].right = width - GAP_BETWEEN_PANELS;
+				panels[2].bottom = height / 2 + panelsSideSize / 2
+						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				break;
+			case "lb":
+				panels[0].left = GAP_BETWEEN_PANELS;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
+						* panelsSideSize;
+				panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+
+				panels[1].left = GAP_BETWEEN_PANELS;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+				panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
+						- panelsSideSize;
+
+				panels[2].left = GAP_BETWEEN_PANELS;
+				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = height - GAP_BETWEEN_PANELS;
+				break;
+			case "cb":
 				panels[0].left = width / 2 - panelsSideSize / 2;
-				panels[0].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
+						* panelsSideSize;
 				panels[0].right = width / 2 + panelsSideSize / 2;
-				panels[0].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+
+				panels[1].left = width / 2 - panelsSideSize / 2;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+				panels[1].right = width / 2 + panelsSideSize / 2;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
+						- panelsSideSize;
+
+				panels[2].left = width / 2 - panelsSideSize / 2;
+				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[2].right = width / 2 + panelsSideSize / 2;
+				panels[2].bottom = height - GAP_BETWEEN_PANELS;
 				break;
-			case "+1 0":
-				break;
-			case "-1 +1":
-				break;
-			case "0 +1":
-				break;
-			case "+1 +1":
+			case "rb":
+				panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
+						* panelsSideSize;
+				panels[0].right = width - GAP_BETWEEN_PANELS;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+
+				panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
+						* panelsSideSize;
+				panels[1].right = width - GAP_BETWEEN_PANELS;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
+						- panelsSideSize;
+
+				panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[2].right = width - GAP_BETWEEN_PANELS;
+				panels[2].bottom = height - GAP_BETWEEN_PANELS;
 				break;
 			default:
 				break;
