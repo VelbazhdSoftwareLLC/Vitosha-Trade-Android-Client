@@ -29,13 +29,13 @@ import android.view.SurfaceHolder;
 public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static final double TRAINING_TIME_PERCENT_FROM_DELAY = 1D;
 
+	private static final int GAP_BETWEEN_PANELS = 10;
+	
 	private static final Random PRNG = new Random();
 
-	private static int top = 0;
-
-	private static int left = 0;
-
 	private static long delay = 0;
+
+	private static int panelsSideSize = 0;
 
 	private static int width = 0;
 
@@ -44,6 +44,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static boolean visible = false;
 
 	private static Bitmap images[] = null;
+
+	private static Rect panels[] = { new Rect(), new Rect(), new Rect() };
 
 	private static BasicNetwork network = new BasicNetwork();
 
@@ -74,9 +76,12 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
 		 * Network construction.
 		 */
-		network.addLayer(new BasicLayer(null, true, counters.get(InputData.INPUT)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters.get(InputData.REGULAR)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, counters.get(InputData.OUTPUT)));
+		network.addLayer(new BasicLayer(null, true, counters
+				.get(InputData.INPUT)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters
+				.get(InputData.REGULAR)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false,
+				counters.get(InputData.OUTPUT)));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
@@ -108,7 +113,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				input[i][j] = 0.1 + 0.8 * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min)
+						/ (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -118,7 +124,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = 0.1 + 0.8 * (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = 0.1 + 0.8
+					* (values[values.length - inputSize + j] - min)
+					/ (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}
@@ -164,31 +172,38 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			SurfaceHolder holder = getSurfaceHolder();
 			Canvas canvas = null;
 
-			Bitmap image = images[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % images.length];
-			left = PRNG.nextInt(image.getWidth() - width);
-			top = PRNG.nextInt(image.getHeight() - height);
+			Bitmap image = images[Calendar.getInstance().get(
+					Calendar.DAY_OF_YEAR)
+					% images.length];
+			int left = PRNG.nextInt(image.getWidth() - width);
+			int top = PRNG.nextInt(image.getHeight() - height);
 
 			try {
 				canvas = holder.lockCanvas();
 				if (canvas != null) {
-					canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
-							new Rect(0, 0, width - 1, height - 1), null);
+					canvas.drawBitmap(image, new Rect(left, top, left + width
+							- 1, top + height - 1), new Rect(0, 0, width - 1,
+							height - 1), null);
 
 					/*
 					 * Panels.
 					 */
 					Paint paint = new Paint();
 					paint.setColor(Color.argb(63, 0, 0, 0));
-					canvas.drawRect(width / 2 - 50, height / 2 - 50, width / 2 + 50, height / 2 + 50, paint);
-					canvas.drawRect(width / 2 - 50, height / 2 + 60, width / 2 + 50, height / 2 + 160, paint);
+					canvas.drawRect(width / 2 - 50, height / 2 - 50,
+							width / 2 + 50, height / 2 + 50, paint);
+					canvas.drawRect(width / 2 - 50, height / 2 + 60,
+							width / 2 + 50, height / 2 + 160, paint);
 
 					/*
 					 * Time series info.
 					 */
 					paint.setTextSize(20);
 					paint.setColor(Color.argb(95, 255, 255, 255));
-					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40, height / 2 - 130, paint);
-					canvas.drawText("" + InputData.PERIOD, width / 2 - 40, height / 2 - 100, paint);
+					canvas.drawText("" + InputData.SYMBOL, width / 2 - 40,
+							height / 2 - 130, paint);
+					canvas.drawText("" + InputData.PERIOD, width / 2 - 40,
+							height / 2 - 100, paint);
 
 					/*
 					 * Forecast.
@@ -196,16 +211,22 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					int x = width / 2 - 50;
 					int y = height / 2 + 50;
 					paint.setColor(Color.argb(95, 0, 255, 0));
-					for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
+					for (int i = 0; forecast.getData() != null
+							&& i < forecast.getData().length; i++) {
 						for (int g = 0; g < 6; g++) {
-							canvas.drawLine(x, y, x, y - (int) (forecast.getData()[i] * 100D), paint);
+							canvas.drawLine(x, y, x,
+									y - (int) (forecast.getData()[i] * 100D),
+									paint);
 							x++;
 						}
 					}
 					paint.setColor(Color.argb(95, 255, 0, 0));
-					for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
+					for (int i = 0; output.getData() != null
+							&& i < output.getData().length; i++) {
 						for (int g = 0; g < 6; g++) {
-							canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * 100D), paint);
+							canvas.drawLine(x, y, x,
+									y - (int) (output.getData()[i] * 100D),
+									paint);
 							x++;
 						}
 					}
@@ -215,10 +236,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					 */
 					int k = 0;
 					int l = 0;
-					double topology[][] = { forecast.getData(),
-							new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
+					double topology[][] = {
+							forecast.getData(),
+							new double[network.getLayerNeuronCount(0)
+									* network.getLayerNeuronCount(1)],
 							new double[network.getLayerNeuronCount(1)],
-							new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
+							new double[network.getLayerNeuronCount(1)
+									* network.getLayerNeuronCount(2)],
 							output.getData() };
 					for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
 						if (n >= network.getLayerNeuronCount(1)) {
@@ -281,14 +305,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					/*
 					 * Draw topology.
 					 */
-					int colors[] = { Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
-							Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
+					int colors[] = { Color.argb(95, 0, 255, 0),
+							Color.argb(95, 255, 255, 255),
+							Color.argb(95, 0, 0, 255),
+							Color.argb(95, 255, 255, 255),
+							Color.argb(95, 255, 0, 0) };
 					for (x = width / 2 - 50, k = 0; x < width / 2 + 50; x += 20, k++) {
 						for (int g = 0; g < 20; g++) {
 							for (y = height / 2 + 110 - topology[k].length / 2, l = 0; y < height / 2 + 160
 									&& l < topology[k].length; y++, l++) {
 								paint.setColor(colors[k]);
-								paint.setColor(Color.argb(Color.alpha(colors[k]),
+								paint.setColor(Color.argb(
+										Color.alpha(colors[k]),
 										(int) (Color.red(colors[k]) * topology[k][l]),
 										(int) (Color.green(colors[k]) * topology[k][l]),
 										(int) (Color.blue(colors[k]) * topology[k][l])));
@@ -312,13 +340,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		public WallpaperEngine() {
 			super();
 
-			SharedPreferences preferences = PreferenceManager
-					.getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
-
-			top = Integer.parseInt(preferences.getString("top_corner", "0"));
-			left = Integer.parseInt(preferences.getString("left_corner", "0"));
-			delay = Long.parseLong(preferences.getString("loading", "" + 86400000));
-
 			handler.post(trainer);
 		}
 
@@ -341,10 +362,57 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		@Override
-		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		public void onSurfaceChanged(SurfaceHolder holder, int format,
+				int width, int height) {
+			super.onSurfaceChanged(holder, format, width, height);
+
 			VitoshaTradeWallpaperService.this.width = width;
 			VitoshaTradeWallpaperService.this.height = height;
-			super.onSurfaceChanged(holder, format, width, height);
+
+			SharedPreferences preferences = PreferenceManager
+					.getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
+
+			panelsSideSize = Integer.parseInt(preferences.getString("sizing",
+					"100"));
+			switch (preferences.getString("positioning", "0 0")) {
+			case "-1 -1":
+				break;
+			case "0 -1":
+				break;
+			case "+1 -1":
+				break;
+			case "-1 0":
+				break;
+			case "0 0":
+				panels[0].left = width / 2 - panelsSideSize / 2;
+				panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].right = width / 2 + panelsSideSize / 2;
+				panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+				
+				panels[1].left = width / 2 - panelsSideSize / 2;
+				panels[1].top = height / 2 - panelsSideSize / 2;
+				panels[1].right = width / 2 + panelsSideSize / 2;
+				panels[1].bottom = height / 2 + panelsSideSize / 2;
+				
+				panels[0].left = width / 2 - panelsSideSize / 2;
+				panels[0].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+				panels[0].right = width / 2 + panelsSideSize / 2;
+				panels[0].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+				break;
+			case "+1 0":
+				break;
+			case "-1 +1":
+				break;
+			case "0 +1":
+				break;
+			case "+1 +1":
+				break;
+			default:
+				break;
+			}
+			delay = Long.parseLong(preferences.getString("loading",
+					"" + 86400000));
+
 		}
 	}
 

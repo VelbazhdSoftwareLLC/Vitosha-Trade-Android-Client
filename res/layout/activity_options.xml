@@ -3,6 +3,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
+    <SwitchPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:defaultValue="false"
+        android:key="set_wallpaper"
+        android:title="@string/set_wallpaper_title" />
+
     <ListPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -13,31 +20,24 @@
         android:persistent="true"
         android:title="@string/loading_title" />
 
-<!--     <EditTextPreference -->
-<!--         android:defaultValue="0" -->
-<!--         android:dialogTitle="Top" -->
-<!--         android:inputType="number" -->
-<!--         android:key="top_corner" -->
-<!--         android:maxLines="1" -->
-<!--         android:persistent="true" -->
-<!--         android:title="Top Corner" -->
-<!--         android:visibility="gone" /> -->
-
-<!--     <EditTextPreference -->
-<!--         android:defaultValue="0" -->
-<!--         android:dialogTitle="Left" -->
-<!--         android:inputType="number" -->
-<!--         android:key="left_corner" -->
-<!--         android:maxLines="1" -->
-<!--         android:persistent="true" -->
-<!--         android:title="Left Corner" -->
-<!--         android:visibility="gone" /> -->
-
-    <SwitchPreference
+    <ListPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:defaultValue="false"
-        android:key="set_wallpaper"
-        android:title="@string/set_wallpaper_title" />
+        android:defaultValue="0 0"
+        android:entries="@array/positions_keys"
+        android:entryValues="@array/positions_values"
+        android:key="positioning"
+        android:persistent="true"
+        android:title="@string/positioning_title" />
 
+    <ListPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:defaultValue="100"
+        android:entries="@array/panels_keys"
+        android:entryValues="@array/panels_values"
+        android:key="sizing"
+        android:persistent="true"
+        android:title="@string/panels_title" />
+    
 </PreferenceScreen>

@@ -15,5 +15,37 @@
         <item name="high">1800000</item>
         <item name="very_high">600000</item>
     </string-array>
+    <string-array name="positions_keys">
+        <item name="left_top">Left-Top</item>
+        <item name="center_top">Center-Top</item>
+        <item name="rigth_top">Rigth-Top</item>
+        <item name="left_center">Left-Center</item>
+        <item name="center_center">Center-Center</item>
+        <item name="rigth_center">Rigth-Center</item>
+        <item name="left_bottom">Left-Bottom</item>
+        <item name="center_bottom">Center-Bottom</item>
+        <item name="rigth_bottom">Rigth-Bottom</item>
+    </string-array>
+    <string-array name="positions_values">
+        <item name="left_top">-1 -1</item>
+        <item name="center_top">0 -1</item>
+        <item name="rigth_top">+1 -1</item>
+        <item name="left_center">-1 0</item>
+        <item name="center_center">0 0</item>
+        <item name="rigth_center">+1 0</item>
+        <item name="left_bottom">-1 +1</item>
+        <item name="center_bottom">0 +1</item>
+        <item name="rigth_bottom">+1 +1</item>
+    </string-array>
+    <string-array name="panels_keys">
+        <item name="small">Small</item>
+        <item name="normal">Normal</item>
+        <item name="large">Large</item>
+    </string-array>
+    <string-array name="panels_values">
+        <item name="small">100</item>
+        <item name="normal">200</item>
+        <item name="large">300</item>
+    </string-array>
 
 </resources>
