@@ -26,66 +26,131 @@ import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
+/**
+ * 
+ * @author Todor Balabanov
+ */
 public class VitoshaTradeWallpaperService extends WallpaperService {
-	private static final double TRAINING_TIME_PERCENT_FROM_DELAY = 1D;
-
-	private static final int GAP_BETWEEN_PANELS = 10;
-
-	private static final int PANEL_BACKGROUND_COLOR = Color.argb(63, 0, 0, 0);
-
-	private static final int PANEL_TEXT_COLOR = Color.argb(95, 255, 255, 255);
-
+	/**
+	 * 
+	 */
 	private static final Random PRNG = new Random();
 
+	/**
+	 * 
+	 */
+	private static final int GAP_BETWEEN_PANELS = 10;
+
+	/**
+	 * 
+	 */
+	private static final int PANEL_BACKGROUND_COLOR = Color.argb(63, 0, 0, 0);
+
+	/**
+	 * 
+	 */
+	private static final int PANEL_TEXT_COLOR = Color.argb(95, 255, 255, 255);
+
+	/**
+	 * 
+	 */
+	private static final int CHART_COLORS[] = { Color.argb(95, 0, 255, 0),
+			Color.argb(95, 255, 0, 0) };
+
+	/**
+	 * 
+	 */
+	private static final int ANN_COLORS[] = { Color.argb(95, 0, 255, 0),
+			Color.argb(95, 255, 255, 255), Color.argb(95, 0, 0, 255),
+			Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
+
+	/**
+	 * 
+	 */
 	private static long delay = 0;
 
+	/**
+	 * 
+	 */
 	private static int panelsSideSize = 0;
 
+	/**
+	 * 
+	 */
 	private static int width = 0;
 
+	/**
+	 * 
+	 */
 	private static int height = 0;
 
+	/**
+	 * 
+	 */
 	private static boolean visible = false;
 
+	/**
+	 * 
+	 */
 	private static Bitmap images[] = null;
 
+	/**
+	 * 
+	 */
 	private static Rect panels[] = { new Rect(), new Rect(), new Rect() };
 
+	/**
+	 * 
+	 */
 	private static BasicNetwork network = new BasicNetwork();
 
+	/**
+	 * 
+	 */
 	private static MLDataSet examples = null;
 
+	/**
+	 * 
+	 */
 	private static MLData forecast = null;
 
+	/**
+	 * 
+	 */
 	private static MLData output = null;
 
+	/**
+	 * 
+	 */
 	private static ResilientPropagation train = null;
 
+	/**
+	 * Initialize static class members.
+	 */
 	static {
 		// TODO Load ANN structure from the remote server.
 		Map<Integer, Integer> counters = new HashMap<Integer, Integer>();
-		counters.put(InputData.REGULAR, 0);
-		counters.put(InputData.BIAS, 0);
-		counters.put(InputData.INPUT, 0);
-		counters.put(InputData.OUTPUT, 0);
+		counters.put(NeuronType.REGULAR, 0);
+		counters.put(NeuronType.BIAS, 0);
+		counters.put(NeuronType.INPUT, 0);
+		counters.put(NeuronType.OUTPUT, 0);
 
 		for (int type : InputData.NEURONS) {
 			counters.put(type, counters.get(type) + 1);
 		}
 
-		int inputSize = counters.get(InputData.INPUT);
-		int hiddenSize = counters.get(InputData.REGULAR);
-		int outputSize = counters.get(InputData.OUTPUT);
+		int inputSize = counters.get(NeuronType.INPUT);
+		int outputSize = counters.get(NeuronType.OUTPUT);
 
 		/*
 		 * Network construction.
 		 */
 		network.addLayer(new BasicLayer(null, true, counters
-				.get(InputData.INPUT)));
+				.get(NeuronType.INPUT)));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters
-				.get(InputData.REGULAR)));
+				.get(NeuronType.REGULAR)));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), false,
-				counters.get(InputData.OUTPUT)));
+				counters.get(NeuronType.OUTPUT)));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
@@ -135,9 +200,24 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		forecast = new BasicMLData(input[0]);
 	}
 
+	/**
+	 * 
+	 * @author Todor Balabanov
+	 */
 	private class WallpaperEngine extends Engine {
+		/**
+		 * 
+		 */
 		private final Handler handler = new Handler();
 
+		/**
+		 * 
+		 */
+		private final Paint paint = new Paint();
+
+		/**
+		 * 
+		 */
 		private final Runnable trainer = new Runnable() {
 			@Override
 			public void run() {
@@ -147,6 +227,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 		};
 
+		/**
+		 * 
+		 */
 		private void train() {
 			if (network == null) {
 				return;
@@ -160,6 +243,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			train.finishTraining();
 		}
 
+		/**
+		 * 
+		 */
 		private void predict() {
 			if (forecast == null) {
 				return;
@@ -168,6 +254,204 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			output = network.compute(forecast);
 		}
 
+		/**
+		 * 
+		 * @param canvas
+		 */
+		private void drawBackgroud(Canvas canvas) {
+			/*
+			 * Change picture according the day in the year.
+			 */
+			Bitmap image = images[Calendar.getInstance().get(
+					Calendar.DAY_OF_YEAR)
+					% images.length];
+
+			/*
+			 * Select random top-left corner for image clip.
+			 */
+			int left = PRNG.nextInt(image.getWidth() - width);
+			int top = PRNG.nextInt(image.getHeight() - height);
+
+			/*
+			 * Clip part of the image.
+			 */
+			canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top
+					+ height - 1), new Rect(0, 0, width - 1, height - 1), null);
+		}
+
+		/**
+		 * 
+		 * @param canvas
+		 */
+		private void drawPanels(Canvas canvas) {
+			/*
+			 * Panels.
+			 */
+			paint.setColor(PANEL_BACKGROUND_COLOR);
+			for (Rect rectangle : panels) {
+				canvas.drawRect(rectangle, paint);
+			}
+		}
+
+		/**
+		 * 
+		 * @param canvas
+		 */
+		private void drawCurrencyPairInfo(Canvas canvas) {
+			/*
+			 * Time series info.
+			 */
+			int textSize = panelsSideSize / 5;
+			paint.setTextSize(textSize);
+			paint.setColor(PANEL_TEXT_COLOR);
+			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS
+					+ panels[0].left, GAP_BETWEEN_PANELS + panels[0].top
+					+ textSize, paint);
+			canvas.drawText("" + TimePeriod.get(InputData.PERIOD),
+					GAP_BETWEEN_PANELS + panels[0].left, GAP_BETWEEN_PANELS
+							+ panels[0].top + 2 * textSize, paint);
+		}
+
+		/**
+		 * 
+		 * @param canvas
+		 */
+		private void drawForecast(Canvas canvas) {
+			/*
+			 * Forecast.
+			 */
+			int x = panels[1].left;
+			int y = panels[1].bottom;
+
+			paint.setColor(CHART_COLORS[0]);
+			for (int i = 0; forecast.getData() != null
+					&& i < forecast.getData().length; i++) {
+				for (int dx = 0; dx < panelsSideSize
+						/ (network.getLayerNeuronCount(0) + network
+								.getLayerNeuronCount(2)); dx++) {
+					canvas.drawLine(x, y, x, y
+							- (int) (forecast.getData()[i] * panelsSideSize),
+							paint);
+					x++;
+				}
+			}
+
+			paint.setColor(CHART_COLORS[1]);
+			for (int i = 0; output.getData() != null
+					&& i < output.getData().length; i++) {
+				for (int dx = 0; dx < panelsSideSize
+						/ (network.getLayerNeuronCount(0) + network
+								.getLayerNeuronCount(2)); dx++) {
+					canvas.drawLine(x, y, x, y
+							- (int) (output.getData()[i] * panelsSideSize),
+							paint);
+					x++;
+				}
+			}
+		}
+
+		/**
+		 * 
+		 * @param canvas
+		 */
+		private void drawAnn(Canvas canvas) {
+			/*
+			 * Artificial neural network.
+			 */
+			double topology[][] = {
+					forecast.getData(),
+					new double[network.getLayerNeuronCount(0)
+							* network.getLayerNeuronCount(1)],
+					new double[network.getLayerNeuronCount(1)],
+					new double[network.getLayerNeuronCount(1)
+							* network.getLayerNeuronCount(2)], output.getData() };
+
+			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
+				if (n >= network.getLayerNeuronCount(1)) {
+					n = 0;
+					m++;
+				}
+				if (m >= network.getLayerNeuronCount(0)) {
+					m = 0;
+				}
+				topology[1][i] = network.getWeight(0, m, n);
+				n++;
+			}
+
+			for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
+				if (n >= network.getLayerNeuronCount(2)) {
+					n = 0;
+					m++;
+				}
+				if (m >= network.getLayerNeuronCount(1)) {
+					m = 0;
+				}
+				topology[3][i] = network.getWeight(1, m, n);
+				n++;
+			}
+
+			/*
+			 * Hidden layer values.
+			 */
+			for (int i = 0; i < network.getLayerNeuronCount(1); i++) {
+				topology[2][i] = network.getLayerOutput(1, i);
+			}
+
+			/*
+			 * Normalize weights.
+			 */
+			double min = Double.MAX_VALUE;
+			double max = Double.MIN_VALUE;
+			for (double value : topology[1]) {
+				if (value < min) {
+					min = value;
+				}
+				if (value > max) {
+					max = value;
+				}
+			}
+			for (double value : topology[3]) {
+				if (value < min) {
+					min = value;
+				}
+				if (value > max) {
+					max = value;
+				}
+			}
+			for (int i = 0; i < topology[1].length; i++) {
+				topology[1][i] = (topology[1][i] - min) / (max - min);
+			}
+			for (int i = 0; i < topology[3].length; i++) {
+				topology[3][i] = (topology[3][i] - min) / (max - min);
+			}
+
+			/*
+			 * Draw topology.
+			 */
+			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += panelsSideSize
+					/ ANN_COLORS.length, k++) {
+				for (int dx = 0; dx < panelsSideSize / ANN_COLORS.length; dx++) {
+					for (int y = panels[2].top, l = 0; y < panels[2].bottom
+							&& l < topology[k].length; y += panelsSideSize
+							/ topology[k].length, l++) {
+						for (int dy = 0; dy < panelsSideSize
+								/ topology[k].length; dy++) {
+							paint.setColor(ANN_COLORS[k]);
+							paint.setColor(Color.argb(
+									Color.alpha(ANN_COLORS[k]),
+									(int) (Color.red(ANN_COLORS[k]) * topology[k][l]),
+									(int) (Color.green(ANN_COLORS[k]) * topology[k][l]),
+									(int) (Color.blue(ANN_COLORS[k]) * topology[k][l])));
+							canvas.drawPoint(x + dx, y + dy, paint);
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * 
+		 */
 		private void draw() {
 			if (images == null) {
 				return;
@@ -180,165 +464,15 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				canvas = holder.lockCanvas();
 
 				if (canvas != null) {
-					/*
-					 * Change picture according the day in the year.
-					 */
-					Bitmap image = images[Calendar.getInstance().get(
-							Calendar.DAY_OF_YEAR)
-							% images.length];
+					drawBackgroud(canvas);
 
-					/*
-					 * Select random top-left corner for image clip.
-					 */
-					int left = PRNG.nextInt(image.getWidth() - width);
-					int top = PRNG.nextInt(image.getHeight() - height);
+					drawPanels(canvas);
 
-					/*
-					 * Clip part of the image.
-					 */
-					canvas.drawBitmap(image, new Rect(left, top, left + width
-							- 1, top + height - 1), new Rect(0, 0, width - 1,
-							height - 1), null);
+					drawCurrencyPairInfo(canvas);
 
-					/*
-					 * Panels.
-					 */
-					Paint paint = new Paint();
-					paint.setColor(PANEL_BACKGROUND_COLOR);
-					for (Rect rectangle : panels) {
-						canvas.drawRect(rectangle, paint);
-					}
+					drawForecast(canvas);
 
-					/*
-					 * Time series info.
-					 */
-					int textSize = panelsSideSize / 5;
-					paint.setTextSize(textSize);
-					paint.setColor(PANEL_TEXT_COLOR);
-					canvas.drawText("" + InputData.SYMBOL, panels[0].left
-							+ textSize, panels[0].bottom - 3 * textSize, paint);
-					canvas.drawText("" + InputData.PERIOD, panels[0].left
-							+ textSize, panels[0].bottom - textSize, paint);
-
-					/*
-					 * Forecast.
-					 */
-					int x = panels[1].left;
-					int y = panels[1].bottom;
-					paint.setColor(Color.argb(95, 0, 255, 0));
-					for (int i = 0; forecast.getData() != null
-							&& i < forecast.getData().length; i++) {
-						for (int g = 0; g < 6; g++) {
-							canvas.drawLine(x, y, x,
-									y - (int) (forecast.getData()[i] * 100D),
-									paint);
-							x++;
-						}
-					}
-					paint.setColor(Color.argb(95, 255, 0, 0));
-					for (int i = 0; output.getData() != null
-							&& i < output.getData().length; i++) {
-						for (int g = 0; g < 6; g++) {
-							canvas.drawLine(x, y, x,
-									y - (int) (output.getData()[i] * 100D),
-									paint);
-							x++;
-						}
-					}
-
-					/*
-					 * Artificial neural network.
-					 */
-					int k = 0;
-					int l = 0;
-					double topology[][] = {
-							forecast.getData(),
-							new double[network.getLayerNeuronCount(0)
-									* network.getLayerNeuronCount(1)],
-							new double[network.getLayerNeuronCount(1)],
-							new double[network.getLayerNeuronCount(1)
-									* network.getLayerNeuronCount(2)],
-							output.getData() };
-					for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
-						if (n >= network.getLayerNeuronCount(1)) {
-							n = 0;
-							m++;
-						}
-						if (m >= network.getLayerNeuronCount(0)) {
-							m = 0;
-						}
-						topology[1][i] = network.getWeight(0, m, n);
-						n++;
-					}
-					for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
-						if (n >= network.getLayerNeuronCount(2)) {
-							n = 0;
-							m++;
-						}
-						if (m >= network.getLayerNeuronCount(1)) {
-							m = 0;
-						}
-						topology[3][i] = network.getWeight(1, m, n);
-						n++;
-					}
-
-					/*
-					 * Hidden layer values.
-					 */
-					for (int i = 0; i < network.getLayerNeuronCount(1); i++) {
-						topology[2][i] = network.getLayerOutput(1, i);
-					}
-
-					/*
-					 * Normalize weights.
-					 */
-					double min = Double.MAX_VALUE;
-					double max = Double.MIN_VALUE;
-					for (double value : topology[1]) {
-						if (value < min) {
-							min = value;
-						}
-						if (value > max) {
-							max = value;
-						}
-					}
-					for (double value : topology[3]) {
-						if (value < min) {
-							min = value;
-						}
-						if (value > max) {
-							max = value;
-						}
-					}
-					for (int i = 0; i < topology[1].length; i++) {
-						topology[1][i] = (topology[1][i] - min) / (max - min);
-					}
-					for (int i = 0; i < topology[3].length; i++) {
-						topology[3][i] = (topology[3][i] - min) / (max - min);
-					}
-
-					/*
-					 * Draw topology.
-					 */
-					int colors[] = { Color.argb(95, 0, 255, 0),
-							Color.argb(95, 255, 255, 255),
-							Color.argb(95, 0, 0, 255),
-							Color.argb(95, 255, 255, 255),
-							Color.argb(95, 255, 0, 0) };
-					for (x = panels[2].left, k = 0; k < colors.length; x += panelsSideSize / 5, k++) {
-						for (int g = 0; g < panelsSideSize / 5; g++) {
-							for (y = panels[2].top, l = 0; y < panels[2].bottom
-									&& l < topology[k].length; y++, l++) {
-								paint.setColor(colors[k]);
-								paint.setColor(Color.argb(
-										Color.alpha(colors[k]),
-										(int) (Color.red(colors[k]) * topology[k][l]),
-										(int) (Color.green(colors[k]) * topology[k][l]),
-										(int) (Color.blue(colors[k]) * topology[k][l])));
-								canvas.drawPoint(x + g, y, paint);
-							}
-						}
-					}
+					drawAnn(canvas);
 				}
 			} finally {
 				if (canvas != null) {
@@ -352,15 +486,21 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 		}
 
+		/**
+		 * 
+		 */
 		public WallpaperEngine() {
 			super();
 
 			handler.post(trainer);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void onVisibilityChanged(boolean visible) {
-			VitoshaTradeWallpaperService.this.visible = visible;
+			VitoshaTradeWallpaperService.visible = visible;
 
 			if (visible == true) {
 				handler.post(trainer);
@@ -369,20 +509,26 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void onSurfaceDestroyed(SurfaceHolder holder) {
 			super.onSurfaceDestroyed(holder);
-			VitoshaTradeWallpaperService.this.visible = false;
+			VitoshaTradeWallpaperService.visible = false;
 			handler.removeCallbacks(trainer);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void onSurfaceChanged(SurfaceHolder holder, int format,
 				int width, int height) {
 			super.onSurfaceChanged(holder, format, width, height);
 
-			VitoshaTradeWallpaperService.this.width = width;
-			VitoshaTradeWallpaperService.this.height = height;
+			VitoshaTradeWallpaperService.width = width;
+			VitoshaTradeWallpaperService.height = height;
 
 			SharedPreferences preferences = PreferenceManager
 					.getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
@@ -567,6 +713,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Engine onCreateEngine() {
 		// TODO Find better place to initialize images.
