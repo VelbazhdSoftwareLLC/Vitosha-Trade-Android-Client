@@ -1,0 +1,1 @@
+- Add option to activate the application as widget or as wallpaper.
