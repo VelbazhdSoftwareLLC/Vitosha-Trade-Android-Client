@@ -1,6 +1,7 @@
 package eu.veldsoft.vitdiscomp;
 
 /**
+ * Time series fixed time periods.
  * 
  * @author Todor Balabanov
  */
@@ -9,7 +10,7 @@ enum TimePeriod {
 	/**
 	 * No time period at all.
 	 */
-	NO(0, ""),
+	NONE(0, ""),
 
 	/**
 	 * One minute.
@@ -57,34 +58,64 @@ enum TimePeriod {
 	MN1(43200, "MN1");
 
 	/**
+	 * Factory function for object reference from time interval.
 	 * 
 	 * @param minutes
-	 * @return
+	 *            Time interval in minutes.
+	 * @return Time period as object.
+	 * 
+	 * @throws RuntimeException
+	 *             Rise exception if there is no such time interval in minutes.
 	 */
-	static TimePeriod get(int minutes) {
+	static TimePeriod value(int minutes) throws RuntimeException {
 		for (TimePeriod item : TimePeriod.values()) {
 			if (item.minutes == minutes) {
 				return item;
 			}
 		}
 
-		return null;
+		// TODO Report exception.
+
+		return NONE;
 	}
 
 	/**
+	 * Factory function for object reference from form interval name.
 	 * 
+	 * @param name
+	 *            Time period name.
+	 * @return Time period as object.
+	 * 
+	 * @throws RuntimeException
+	 *             Rise exception if there is no such time interval in minutes.
+	 */
+	static TimePeriod value(String name) throws RuntimeException {
+		for (TimePeriod item : TimePeriod.values()) {
+			if (name.equals(item.name) == true) {
+				return item;
+			}
+		}
+
+		// TODO Report exception.
+
+		return NONE;
+	}
+
+	/**
+	 * Time period as number of minutes.
 	 */
 	private int minutes;
 
 	/**
-	 * 
+	 * Time period as text description.
 	 */
 	private String name;
 
 	/**
+	 * Constructor with all parameters.
 	 * 
-	 * @param minutes
-	 * @param name
+	 * @param minutes Minutes as numbers.
+	 * @param name Interval as name.
 	 */
 	private TimePeriod(int minutes, String name) {
 		this.minutes = minutes;

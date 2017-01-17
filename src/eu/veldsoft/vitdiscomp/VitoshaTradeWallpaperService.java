@@ -54,15 +54,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	/**
 	 * 
 	 */
-	private static final int CHART_COLORS[] = { Color.argb(95, 0, 255, 0),
-			Color.argb(95, 255, 0, 0) };
+	private static final int CHART_COLORS[] = { Color.argb(95, 0, 255, 0), Color.argb(95, 255, 0, 0) };
 
 	/**
 	 * 
 	 */
-	private static final int ANN_COLORS[] = { Color.argb(95, 0, 255, 0),
-			Color.argb(95, 255, 255, 255), Color.argb(95, 0, 0, 255),
-			Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
+	private static final int ANN_COLORS[] = { Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
+			Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0) };
 
 	/**
 	 * 
@@ -145,12 +143,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
 		 * Network construction.
 		 */
-		network.addLayer(new BasicLayer(null, true, counters
-				.get(NeuronType.INPUT)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters
-				.get(NeuronType.REGULAR)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false,
-				counters.get(NeuronType.OUTPUT)));
+		network.addLayer(new BasicLayer(null, true, counters.get(NeuronType.INPUT)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters.get(NeuronType.REGULAR)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, counters.get(NeuronType.OUTPUT)));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
@@ -182,8 +177,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				input[i][j] = 0.1 + 0.8 * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min)
-						/ (max - min);
+				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -193,9 +187,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = 0.1 + 0.8
-					* (values[values.length - inputSize + j] - min)
-					/ (max - min);
+			input[0][j] = 0.1 + 0.8 * (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}
@@ -262,9 +254,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Change picture according the day in the year.
 			 */
-			Bitmap image = images[Calendar.getInstance().get(
-					Calendar.DAY_OF_YEAR)
-					% images.length];
+			Bitmap image = images[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % images.length];
 
 			/*
 			 * Select random top-left corner for image clip.
@@ -275,8 +265,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Clip part of the image.
 			 */
-			canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top
-					+ height - 1), new Rect(0, 0, width - 1, height - 1), null);
+			canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
+					new Rect(0, 0, width - 1, height - 1), null);
 		}
 
 		/**
@@ -304,12 +294,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			int textSize = panelsSideSize / 5;
 			paint.setTextSize(textSize);
 			paint.setColor(PANEL_TEXT_COLOR);
-			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS
-					+ panels[0].left, GAP_BETWEEN_PANELS + panels[0].top
-					+ textSize, paint);
-			canvas.drawText("" + TimePeriod.get(InputData.PERIOD),
-					GAP_BETWEEN_PANELS + panels[0].left, GAP_BETWEEN_PANELS
-							+ panels[0].top + 2 * textSize, paint);
+			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS + panels[0].left,
+					GAP_BETWEEN_PANELS + panels[0].top + textSize, paint);
+			canvas.drawText("" + TimePeriod.value(InputData.PERIOD), GAP_BETWEEN_PANELS + panels[0].left,
+					GAP_BETWEEN_PANELS + panels[0].top + 2 * textSize, paint);
 		}
 
 		/**
@@ -324,27 +312,19 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			int y = panels[1].bottom;
 
 			paint.setColor(CHART_COLORS[0]);
-			for (int i = 0; forecast.getData() != null
-					&& i < forecast.getData().length; i++) {
+			for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
 				for (int dx = 0; dx < panelsSideSize
-						/ (network.getLayerNeuronCount(0) + network
-								.getLayerNeuronCount(2)); dx++) {
-					canvas.drawLine(x, y, x, y
-							- (int) (forecast.getData()[i] * panelsSideSize),
-							paint);
+						/ (network.getLayerNeuronCount(0) + network.getLayerNeuronCount(2)); dx++) {
+					canvas.drawLine(x, y, x, y - (int) (forecast.getData()[i] * panelsSideSize), paint);
 					x++;
 				}
 			}
 
 			paint.setColor(CHART_COLORS[1]);
-			for (int i = 0; output.getData() != null
-					&& i < output.getData().length; i++) {
+			for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
 				for (int dx = 0; dx < panelsSideSize
-						/ (network.getLayerNeuronCount(0) + network
-								.getLayerNeuronCount(2)); dx++) {
-					canvas.drawLine(x, y, x, y
-							- (int) (output.getData()[i] * panelsSideSize),
-							paint);
+						/ (network.getLayerNeuronCount(0) + network.getLayerNeuronCount(2)); dx++) {
+					canvas.drawLine(x, y, x, y - (int) (output.getData()[i] * panelsSideSize), paint);
 					x++;
 				}
 			}
@@ -358,13 +338,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Artificial neural network.
 			 */
-			double topology[][] = {
-					forecast.getData(),
-					new double[network.getLayerNeuronCount(0)
-							* network.getLayerNeuronCount(1)],
+			double topology[][] = { forecast.getData(),
+					new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
 					new double[network.getLayerNeuronCount(1)],
-					new double[network.getLayerNeuronCount(1)
-							* network.getLayerNeuronCount(2)], output.getData() };
+					new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)], output.getData() };
 
 			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
 				if (n >= network.getLayerNeuronCount(1)) {
@@ -428,17 +405,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Draw topology.
 			 */
-			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += panelsSideSize
-					/ ANN_COLORS.length, k++) {
+			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += panelsSideSize / ANN_COLORS.length, k++) {
 				for (int dx = 0; dx < panelsSideSize / ANN_COLORS.length; dx++) {
 					for (int y = panels[2].top, l = 0; y < panels[2].bottom
-							&& l < topology[k].length; y += panelsSideSize
-							/ topology[k].length, l++) {
-						for (int dy = 0; dy < panelsSideSize
-								/ topology[k].length; dy++) {
+							&& l < topology[k].length; y += panelsSideSize / topology[k].length, l++) {
+						for (int dy = 0; dy < panelsSideSize / topology[k].length; dy++) {
 							paint.setColor(ANN_COLORS[k]);
-							paint.setColor(Color.argb(
-									Color.alpha(ANN_COLORS[k]),
+							paint.setColor(Color.argb(Color.alpha(ANN_COLORS[k]),
 									(int) (Color.red(ANN_COLORS[k]) * topology[k][l]),
 									(int) (Color.green(ANN_COLORS[k]) * topology[k][l]),
 									(int) (Color.blue(ANN_COLORS[k]) * topology[k][l])));
@@ -523,8 +496,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void onSurfaceChanged(SurfaceHolder holder, int format,
-				int width, int height) {
+		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			super.onSurfaceChanged(holder, format, width, height);
 
 			VitoshaTradeWallpaperService.width = width;
@@ -533,8 +505,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			SharedPreferences preferences = PreferenceManager
 					.getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
 
-			panelsSideSize = Integer.parseInt(preferences.getString("sizing",
-					"100"));
+			panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
 			switch (preferences.getString("positioning", "0 0")) {
 			case "lt":
 				panels[0].left = GAP_BETWEEN_PANELS;
@@ -586,11 +557,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				break;
 			case "lc":
 				panels[0].left = GAP_BETWEEN_PANELS;
-				panels[0].top = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
 				panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-				panels[0].bottom = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS;
+				panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
 
 				panels[1].left = GAP_BETWEEN_PANELS;
 				panels[1].top = height / 2 - panelsSideSize / 2;
@@ -598,19 +567,15 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 				panels[2].left = GAP_BETWEEN_PANELS;
-				panels[2].top = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS;
+				panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
 				panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
-				panels[2].bottom = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
 				break;
 			case "cc":
 				panels[0].left = width / 2 - panelsSideSize / 2;
-				panels[0].top = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
 				panels[0].right = width / 2 + panelsSideSize / 2;
-				panels[0].bottom = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS;
+				panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
 
 				panels[1].left = width / 2 - panelsSideSize / 2;
 				panels[1].top = height / 2 - panelsSideSize / 2;
@@ -618,19 +583,15 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 				panels[2].left = width / 2 - panelsSideSize / 2;
-				panels[2].top = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS;
+				panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
 				panels[2].right = width / 2 + panelsSideSize / 2;
-				panels[2].bottom = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
 				break;
 			case "rc":
 				panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-				panels[0].top = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS - panelsSideSize;
+				panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
 				panels[0].right = width - GAP_BETWEEN_PANELS;
-				panels[0].bottom = height / 2 - panelsSideSize / 2
-						- GAP_BETWEEN_PANELS;
+				panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
 
 				panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
 				panels[1].top = height / 2 - panelsSideSize / 2;
@@ -638,26 +599,20 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 				panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-				panels[2].top = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS;
+				panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
 				panels[2].right = width - GAP_BETWEEN_PANELS;
-				panels[2].bottom = height / 2 + panelsSideSize / 2
-						+ GAP_BETWEEN_PANELS + panelsSideSize;
+				panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
 				break;
 			case "lb":
 				panels[0].left = GAP_BETWEEN_PANELS;
-				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
-						* panelsSideSize;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
 				panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 
 				panels[1].left = GAP_BETWEEN_PANELS;
-				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 				panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
-				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
-						- panelsSideSize;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
 
 				panels[2].left = GAP_BETWEEN_PANELS;
 				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -666,18 +621,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				break;
 			case "cb":
 				panels[0].left = width / 2 - panelsSideSize / 2;
-				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
-						* panelsSideSize;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
 				panels[0].right = width / 2 + panelsSideSize / 2;
-				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 
 				panels[1].left = width / 2 - panelsSideSize / 2;
-				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 				panels[1].right = width / 2 + panelsSideSize / 2;
-				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
-						- panelsSideSize;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
 
 				panels[2].left = width / 2 - panelsSideSize / 2;
 				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -686,18 +637,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				break;
 			case "rb":
 				panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3
-						* panelsSideSize;
+				panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
 				panels[0].right = width - GAP_BETWEEN_PANELS;
-				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 
 				panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2
-						* panelsSideSize;
+				panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
 				panels[1].right = width - GAP_BETWEEN_PANELS;
-				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS
-						- panelsSideSize;
+				panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
 
 				panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
 				panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -707,8 +654,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			default:
 				break;
 			}
-			delay = Long.parseLong(preferences.getString("loading",
-					"" + 86400000));
+			delay = Long.parseLong(preferences.getString("loading", "" + 86400000));
 
 		}
 	}

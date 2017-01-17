@@ -33,7 +33,7 @@ public class ForecastDatabaseHelper extends SQLiteOpenHelper {
 	 * 
 	 * @author Todor Balabanov
 	 */
-	public static abstract class AnnsColumns implements BaseColumns {
+	public static abstract class ANNsColumns implements BaseColumns {
 		public static final String TABLE_NAME = "anns";
 		public static final String COLUMN_NAME_SYMBOL = "symbol";
 		public static final String COLUMN_NAME_PERIOD = "period";
@@ -65,12 +65,12 @@ public class ForecastDatabaseHelper extends SQLiteOpenHelper {
 	/**
 	 * Create ANNs table SQL patter.
 	 */
-	private static final String SQL_CREATE_ANNS = "CREATE TABLE " + AnnsColumns.TABLE_NAME + " (" + AnnsColumns._ID
-			+ " INTEGER PRIMARY KEY," + AnnsColumns.COLUMN_NAME_SYMBOL + " TEXT, " + AnnsColumns.COLUMN_NAME_PERIOD
-			+ " INTEGER, " + AnnsColumns.COLUMN_NAME_NEURONS + " TEXT, " + AnnsColumns.COLUMN_NAME_ACTIVITIES
-			+ " TEXT, " + AnnsColumns.COLUMN_NAME_WEIGHTS + " TEXT, FOREIGN KEY (" + AnnsColumns.COLUMN_NAME_SYMBOL
+	private static final String SQL_CREATE_ANNS = "CREATE TABLE " + ANNsColumns.TABLE_NAME + " (" + ANNsColumns._ID
+			+ " INTEGER PRIMARY KEY," + ANNsColumns.COLUMN_NAME_SYMBOL + " TEXT, " + ANNsColumns.COLUMN_NAME_PERIOD
+			+ " INTEGER, " + ANNsColumns.COLUMN_NAME_NEURONS + " TEXT, " + ANNsColumns.COLUMN_NAME_ACTIVITIES
+			+ " TEXT, " + ANNsColumns.COLUMN_NAME_WEIGHTS + " TEXT, FOREIGN KEY (" + ANNsColumns.COLUMN_NAME_SYMBOL
 			+ ") REFERENCES " + RatesColumns.TABLE_NAME + "(" + RatesColumns.COLUMN_NAME_SYMBOL + "), FOREIGN KEY ("
-			+ AnnsColumns.COLUMN_NAME_PERIOD + ") REFERENCES " + RatesColumns.TABLE_NAME + "("
+			+ ANNsColumns.COLUMN_NAME_PERIOD + ") REFERENCES " + RatesColumns.TABLE_NAME + "("
 			+ RatesColumns.COLUMN_NAME_PERIOD + "))";
 
 	/**
@@ -81,7 +81,7 @@ public class ForecastDatabaseHelper extends SQLiteOpenHelper {
 	/**
 	 * Drop rates table SQL pattern.
 	 */
-	static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS " + AnnsColumns.TABLE_NAME;
+	static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS " + ANNsColumns.TABLE_NAME;
 
 	/**
 	 * Constructor.
@@ -102,6 +102,9 @@ public class ForecastDatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL(SQL_CREATE_ANNS);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL(SQL_DELETE_ANNS);
