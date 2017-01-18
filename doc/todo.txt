@@ -1,1 +1,5 @@
 - Add option to activate the application as widget or as wallpaper.
+
+- Add possibility user to mark his guess for a forecasting and collect this information on the server. Some users can be very successful in the guessing of the price movements.
+
+- Use sine function with very wide period as neurons activation function instead of the sigmoid function. The cosine is the derivative of the sine and back propagation can be used for the training.
