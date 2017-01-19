@@ -144,8 +144,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * Network construction.
 		 */
 		network.addLayer(new BasicLayer(null, true, counters.get(NeuronType.INPUT)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, counters.get(NeuronType.REGULAR)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, counters.get(NeuronType.OUTPUT)));
+		network.addLayer(new BasicLayer(new ActivationFadingSin(), true, counters.get(NeuronType.REGULAR)));
+		network.addLayer(new BasicLayer(new ActivationFadingSin(), false, counters.get(NeuronType.OUTPUT)));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
