@@ -17,7 +17,17 @@ class ActivationFadingSin implements ActivationFunction {
 	/**
 	 * Should be parameter for sine period width.
 	 */
-	private final double PERIOD = 1.0D;
+	private double period = 1.0D;
+
+	/**
+	 * Constructor with parameters.
+	 * 
+	 * @param period
+	 *            Sin function period width.
+	 */
+	public ActivationFadingSin(double period) {
+		this.period = period;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -25,7 +35,7 @@ class ActivationFadingSin implements ActivationFunction {
 	@Override
 	public void activationFunction(double[] values, int start, int size) {
 		for (int i = start; i < (start + size) && i < values.length; i++) {
-			double x = values[i] / PERIOD;
+			double x = values[i] / period;
 
 			if (x < -Math.PI || x > Math.PI) {
 				values[i] = BoundMath.sin(x) / Math.abs(x);
@@ -40,7 +50,7 @@ class ActivationFadingSin implements ActivationFunction {
 	 */
 	@Override
 	public double derivativeFunction(double before, double after) {
-		double x = before / PERIOD;
+		double x = before / period;
 
 		if (x < -Math.PI || x > Math.PI) {
 			return BoundMath.cos(x) / Math.abs(x) - BoundMath.sin(x) / (x * Math.abs(x));

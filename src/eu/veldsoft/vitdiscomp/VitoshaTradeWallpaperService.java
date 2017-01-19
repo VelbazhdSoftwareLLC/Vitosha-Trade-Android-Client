@@ -138,14 +138,15 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		int inputSize = counters.get(NeuronType.INPUT);
+		int hiddenSize = counters.get(NeuronType.REGULAR);
 		int outputSize = counters.get(NeuronType.OUTPUT);
 
 		/*
 		 * Network construction.
 		 */
-		network.addLayer(new BasicLayer(null, true, counters.get(NeuronType.INPUT)));
-		network.addLayer(new BasicLayer(new ActivationFadingSin(), true, counters.get(NeuronType.REGULAR)));
-		network.addLayer(new BasicLayer(new ActivationFadingSin(), false, counters.get(NeuronType.OUTPUT)));
+		network.addLayer(new BasicLayer(null, true, inputSize));
+		network.addLayer(new BasicLayer(new ActivationFadingSin(inputSize), true, hiddenSize));
+		network.addLayer(new BasicLayer(new ActivationFadingSin(hiddenSize), false, outputSize));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
