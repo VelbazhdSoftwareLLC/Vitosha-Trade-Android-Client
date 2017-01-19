@@ -64,13 +64,7 @@ class ActivationFadingSin implements ActivationFunction {
 	 */
 	@Override
 	public ActivationFunction clone() {
-		try {
-			return (ActivationFunction) super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-
-		return null;
+		return new ActivationFadingSin(period);
 	}
 
 	/**
