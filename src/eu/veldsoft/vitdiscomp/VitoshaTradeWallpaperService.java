@@ -168,6 +168,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 		}
 
+		// TODO Get activation function minimum and maximum in some better way.
+		final double MIN = -0.99;
+		final double MAX = +0.99;
+
 		/*
 		 * Prepare training set.
 		 */
@@ -175,10 +179,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = 0.1 + 0.8 * (values[i + j] - min) / (max - min);
+				input[i][j] = MIN + (MAX - MIN) * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = 0.1 + 0.8 * (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = MIN + (MAX - MIN) * (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -188,7 +192,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = 0.1 + 0.8 * (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = MIN + (MAX - MIN) * (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}
