@@ -154,6 +154,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 		double values[] = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
 
+		// TODO Use DataNormalization class provided by Encog.
+
 		/*
 		 * Normalize data.
 		 */
@@ -169,8 +171,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		// TODO Get activation function minimum and maximum in some better way.
-		final double MIN = -0.99;
-		final double MAX = +0.99;
+		final double LOW = -0.99;
+		final double HIGH = +0.99;
 
 		/*
 		 * Prepare training set.
@@ -179,10 +181,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = MIN + (MAX - MIN) * (values[i + j] - min) / (max - min);
+				input[i][j] = LOW + (HIGH - LOW) * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = MIN + (MAX - MIN) * (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = LOW + (HIGH - LOW) * (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -192,7 +194,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = MIN + (MAX - MIN) * (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = LOW + (HIGH - LOW) * (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}
