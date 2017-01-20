@@ -1,18 +1,37 @@
 package eu.veldsoft.vitdiscomp;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
+import org.encog.NullStatusReportable;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.ml.data.market.MarketDataDescription;
+import org.encog.ml.data.market.MarketDataType;
+import org.encog.ml.data.market.MarketMLDataSet;
+import org.encog.ml.data.market.TickerSymbol;
+import org.encog.ml.data.market.loader.LoadedMarketData;
+import org.encog.ml.data.market.loader.MarketLoader;
+import org.encog.ml.data.temporal.TemporalDataDescription;
+import org.encog.ml.data.temporal.TemporalMLDataSet;
+import org.encog.ml.data.temporal.TemporalPoint;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.util.normalize.DataNormalization;
+import org.encog.util.normalize.input.InputField;
+import org.encog.util.normalize.input.InputFieldArray1D;
+import org.encog.util.normalize.output.OutputFieldRangeMapped;
+import org.encog.util.normalize.target.NormalizationStorageArray1D;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -156,6 +175,74 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 		// TODO Use DataNormalization class provided by Encog.
 
+		// InputField in;
+		// double normalized[] = new double[values.length];
+		// DataNormalization norm = new DataNormalization();
+		// norm.setReport(new NullStatusReportable());
+		// norm.addInputField(in = new InputFieldArray1D(true, values));
+		// norm.addOutputField(new OutputFieldRangeMapped(in, LOW, HIGH));
+		// norm.setTarget(new NormalizationStorageArray1D(normalized));
+		// norm.process();
+
+		// TODO Use TemporalMLDataSet class for time series data set which
+		// is provided by Encog.
+
+		// TemporalMLDataSet data = new TemporalMLDataSet(inputSize,
+		// outputSize);
+		// TemporalDataDescription description = new
+		// TemporalDataDescription(TemporalDataDescription.Type.RAW, true,
+		// true);
+		// data.addDescription(description);
+		// for (int index = inputSize; index < normalized.length - outputSize;
+		// index++) {
+		// TemporalPoint point = new TemporalPoint(1);
+		// point.setSequence(index);
+		// point.setData(0, normalized[index]);
+		// data.getPoints().add(point);
+		// }
+		// data.generate();
+
+		// TODO Use MarketDataDescription class for time series data set which
+		// is provided by Encog.
+
+		// MarketMLDataSet data = new MarketMLDataSet(new MarketLoader() {
+		// @Override
+		// public Collection<LoadedMarketData> load(TickerSymbol symbol,
+		// Set<MarketDataType> types, Date start,
+		// Date end) {
+		// Collection<LoadedMarketData> result = new
+		// ArrayList<LoadedMarketData>();
+		//
+		// for (int i = 0; i < InputData.TIME.length; i++) {
+		// if (start.getTime() <= InputData.TIME[i] && InputData.TIME[i] <=
+		// end.getTime()) {
+		// LoadedMarketData value = new LoadedMarketData(new
+		// Date(InputData.TIME[i]), symbol);
+		// value.setData(MarketDataType.CLOSE, InputData.CLOSE[i]);
+		// value.setData(MarketDataType.HIGH, InputData.HIGH[i]);
+		// value.setData(MarketDataType.LOW, InputData.LOW[i]);
+		// value.setData(MarketDataType.OPEN, InputData.OPEN[i]);
+		// value.setData(MarketDataType.VOLUME, InputData.VOLUME[i]);
+		// value.setData(MarketDataType.ADJUSTED_CLOSE, InputData.CLOSE[i]);
+		// result.add(value);
+		// }
+		// }
+		//
+		// return result;
+		// }
+		// }, inputSize, outputSize);
+		//
+		// MarketDataDescription description = new MarketDataDescription(new
+		// TickerSymbol(InputData.SYMBOL),
+		// (new MarketDataType[] { MarketDataType.CLOSE, MarketDataType.HIGH,
+		// MarketDataType.LOW,
+		// MarketDataType.OPEN })[(int) (Math.random() * 4)],
+		// true, true);
+		// data.addDescription(description);
+		// data.load(new Date(InputData.TIME[0]), new
+		// Date(InputData.TIME[InputData.TIME.length - 1]));
+		// data.generate();
+
 		/*
 		 * Normalize data.
 		 */
@@ -170,10 +257,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 		}
 
-		// TODO Get activation function minimum and maximum in some better way.
-		final double LOW = -0.99;
-		final double HIGH = +0.99;
-
 		/*
 		 * Prepare training set.
 		 */
@@ -181,10 +264,12 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = LOW + (HIGH - LOW) * (values[i + j] - min) / (max - min);
+				input[i][j] = ActivationFadingSin.LOW
+						+ (ActivationFadingSin.HIGH - ActivationFadingSin.LOW) * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = LOW + (HIGH - LOW) * (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = ActivationFadingSin.LOW + (ActivationFadingSin.HIGH - ActivationFadingSin.LOW)
+						* (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -194,7 +279,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = LOW + (HIGH - LOW) * (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = ActivationFadingSin.LOW + (ActivationFadingSin.HIGH - ActivationFadingSin.LOW)
+					* (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}

@@ -19,6 +19,18 @@ class ActivationFadingSin implements ActivationFunction {
 	 */
 	private double period = 1.0D;
 
+	// TODO Get activation function minimum and maximum in some better way.
+
+	/**
+	 * Low level of the activation function.
+	 */
+	static final double LOW = -0.99;
+
+	/**
+	 * High level of the activation fuction.
+	 */
+	static final double HIGH = +0.99;
+	
 	/**
 	 * Constructor with parameters.
 	 * 
