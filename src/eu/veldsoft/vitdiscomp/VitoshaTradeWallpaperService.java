@@ -164,8 +164,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * Network construction.
 		 */
 		network.addLayer(new BasicLayer(null, true, inputSize));
-		network.addLayer(new BasicLayer(new ActivationExponentRegulatedSine(inputSize), true, hiddenSize));
-		network.addLayer(new BasicLayer(new ActivationExponentRegulatedSine(hiddenSize), false, outputSize));
+		network.addLayer(new BasicLayer(new ActivationExponentRegulatedSin(inputSize), true, hiddenSize));
+		network.addLayer(new BasicLayer(new ActivationExponentRegulatedSin(hiddenSize), false, outputSize));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
@@ -264,11 +264,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = ActivationExponentRegulatedSine.LOW
-						+ (ActivationExponentRegulatedSine.HIGH - ActivationExponentRegulatedSine.LOW) * (values[i + j] - min) / (max - min);
+				input[i][j] = ActivationExponentRegulatedSin.LOW
+						+ (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW) * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = ActivationExponentRegulatedSine.LOW + (ActivationExponentRegulatedSine.HIGH - ActivationExponentRegulatedSine.LOW)
+				target[i][j] = ActivationExponentRegulatedSin.LOW + (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW)
 						* (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
@@ -279,7 +279,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = ActivationExponentRegulatedSine.LOW + (ActivationExponentRegulatedSine.HIGH - ActivationExponentRegulatedSine.LOW)
+			input[0][j] = ActivationExponentRegulatedSin.LOW + (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW)
 					* (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);

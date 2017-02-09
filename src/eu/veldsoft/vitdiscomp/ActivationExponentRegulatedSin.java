@@ -8,7 +8,7 @@ import org.encog.mathutil.BoundMath;
  * 
  * @author Todor Balabanov
  */
-class ActivationExponentRegulatedSine implements ActivationFunction {
+class ActivationExponentRegulatedSin implements ActivationFunction {
 	/**
 	 * It is used as base.
 	 */
@@ -37,7 +37,7 @@ class ActivationExponentRegulatedSine implements ActivationFunction {
 	 * @param period
 	 *            Sin function period width.
 	 */
-	public ActivationExponentRegulatedSine(double period) {
+	public ActivationExponentRegulatedSin(double period) {
 		this.period = period;
 	}
 
@@ -73,7 +73,7 @@ class ActivationExponentRegulatedSine implements ActivationFunction {
 	 */
 	@Override
 	public ActivationFunction clone() {
-		return new ActivationExponentRegulatedSine(period);
+		return new ActivationExponentRegulatedSin(period);
 	}
 
 	/**
@@ -119,5 +119,4 @@ class ActivationExponentRegulatedSine implements ActivationFunction {
 	public void setParam(int index, double value) {
 		SIN.setParam(index, value);
 	}
-
 }

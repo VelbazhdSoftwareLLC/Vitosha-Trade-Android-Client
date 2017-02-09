@@ -122,5 +122,4 @@ class ActivationFadingSin implements ActivationFunction {
 	public void setParam(int index, double value) {
 		SIN.setParam(index, value);
 	}
-
 }
