@@ -30,6 +30,10 @@ class ActivationFadingSin implements ActivationFunction {
 	}
 
 	/**
+	 * y = sin( x ) , -pi <= x <= +pi
+	 * 
+	 * y = sin( x ) / abs( x ) , -pi > x > +pi
+	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -46,6 +50,10 @@ class ActivationFadingSin implements ActivationFunction {
 	}
 
 	/**
+	 * y' = cos( x ) , -pi <= x <= +pi
+	 * 
+	 * y' = cos( x ) / abs( x ) - sin( x ) / (x * sin( x )) , -pi > x > +pi
+	 * 
 	 * {@inheritDoc}
 	 */
 	@Override

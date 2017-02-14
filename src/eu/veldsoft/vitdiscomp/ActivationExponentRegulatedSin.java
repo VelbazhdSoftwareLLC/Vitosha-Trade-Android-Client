@@ -46,7 +46,10 @@ class ActivationExponentRegulatedSin implements ActivationFunction {
 	}
 
 	/**
-	 * y' = y( x + pi/2 ) - y( x ) , x > 0 y' = y( x + pi/2 ) + y( x ) , x < 0
+	 * y' = y( x + pi/2 ) - y( x ) , x > 0
+	 * 
+	 * y' = y( x + pi/2 ) + y( x ) , x < 0
+	 * 
 	 * y' = +inf , x = 0
 	 *
 	 * {@inheritDoc}
