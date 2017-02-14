@@ -114,8 +114,10 @@ enum TimePeriod {
 	/**
 	 * Constructor with all parameters.
 	 * 
-	 * @param minutes Minutes as numbers.
-	 * @param name Interval as name.
+	 * @param minutes
+	 *            Minutes as numbers.
+	 * @param name
+	 *            Interval as name.
 	 */
 	private TimePeriod(int minutes, String name) {
 		this.minutes = minutes;

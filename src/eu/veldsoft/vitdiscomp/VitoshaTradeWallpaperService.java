@@ -1,37 +1,17 @@
 package eu.veldsoft.vitdiscomp;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
-import org.encog.NullStatusReportable;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.ml.data.market.MarketDataDescription;
-import org.encog.ml.data.market.MarketDataType;
-import org.encog.ml.data.market.MarketMLDataSet;
-import org.encog.ml.data.market.TickerSymbol;
-import org.encog.ml.data.market.loader.LoadedMarketData;
-import org.encog.ml.data.market.loader.MarketLoader;
-import org.encog.ml.data.temporal.TemporalDataDescription;
-import org.encog.ml.data.temporal.TemporalMLDataSet;
-import org.encog.ml.data.temporal.TemporalPoint;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
-import org.encog.util.normalize.DataNormalization;
-import org.encog.util.normalize.input.InputField;
-import org.encog.util.normalize.input.InputFieldArray1D;
-import org.encog.util.normalize.output.OutputFieldRangeMapped;
-import org.encog.util.normalize.target.NormalizationStorageArray1D;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -60,6 +40,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 */
 	private static final int GAP_BETWEEN_PANELS = 10;
 
+	//TODO Put all colors in the settings dialog.
+	
 	/**
 	 * 
 	 */
@@ -258,18 +240,23 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		/*
+		 * At the first index is the low value. At the second index is the high
+		 * value.
+		 */
+		double lowHigh[] = { Double.MIN_VALUE, Double.MAX_VALUE };
+		network.getActivation(0).activationFunction(lowHigh, 0, 2);
+
+		/*
 		 * Prepare training set.
 		 */
 		double input[][] = new double[values.length - (inputSize + outputSize)][inputSize];
 		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = ActivationExponentRegulatedSin.LOW
-						+ (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW) * (values[i + j] - min) / (max - min);
+				input[i][j] = lowHigh[0] + (lowHigh[1] - lowHigh[0]) * (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = ActivationExponentRegulatedSin.LOW + (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW)
-						* (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = lowHigh[0] + (lowHigh[1] - lowHigh[0]) * (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -279,8 +266,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = ActivationExponentRegulatedSin.LOW + (ActivationExponentRegulatedSin.HIGH - ActivationExponentRegulatedSin.LOW)
-					* (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = lowHigh[0]
+					+ (lowHigh[1] - lowHigh[0]) * (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}

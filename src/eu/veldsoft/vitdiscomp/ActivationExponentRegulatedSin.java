@@ -22,16 +22,6 @@ class ActivationExponentRegulatedSin implements ActivationFunction {
 	// TODO Get activation function minimum and maximum in some better way.
 
 	/**
-	 * Low level of the activation function.
-	 */
-	static final double LOW = -0.99;
-
-	/**
-	 * High level of the activation fuction.
-	 */
-	static final double HIGH = +0.99;
-
-	/**
 	 * Constructor with parameters.
 	 * 
 	 * @param period
@@ -56,8 +46,7 @@ class ActivationExponentRegulatedSin implements ActivationFunction {
 	}
 
 	/**
-	 * y' = y( x + pi/2 ) - y( x ) , x > 0
-	 * y' = y( x + pi/2 ) + y( x ) , x < 0
+	 * y' = y( x + pi/2 ) - y( x ) , x > 0 y' = y( x + pi/2 ) + y( x ) , x < 0
 	 * y' = +inf , x = 0
 	 *
 	 * {@inheritDoc}
