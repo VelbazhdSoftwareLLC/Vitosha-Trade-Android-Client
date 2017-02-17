@@ -1,10 +1,14 @@
 package eu.veldsoft.vitdiscomp;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -122,6 +126,21 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 * 
 	 */
 	private static ResilientPropagation train = null;
+
+	/**
+	 * 
+	 * @param activation
+	 * @return
+	 */
+	private static double[] findLowAndHigh(ActivationFunction activation) {
+		double check[] = { Double.MIN_VALUE, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000, -10000, -100000,
+				-1000000, 0, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000, Double.MAX_VALUE };
+		network.getActivation(0).activationFunction(check, 0, check.length);
+
+		Arrays.sort(check);
+
+		return new double[] { check[0], check[check.length - 1] };
+	}
 
 	/**
 	 * Initialize static class members.
@@ -245,11 +264,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * 
 		 * There is a problem with this approach, because some activation
 		 * functions are zero if the argument is infinity.
-		 * 
-		 * double lowHigh[] = { Double.MIN_VALUE, Double.MAX_VALUE };
-		 * network.getActivation(0).activationFunction(lowHigh, 0, 2);
 		 */
-		double lowHigh[] = { -1.0D, +1.0D };
+		double lowHigh[] = findLowAndHigh(network.getActivation(0));
 
 		/*
 		 * Prepare training set.
