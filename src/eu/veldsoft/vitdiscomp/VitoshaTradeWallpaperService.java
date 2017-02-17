@@ -133,8 +133,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 * @return
 	 */
 	private static double[] findLowAndHigh(ActivationFunction activation) {
-		double check[] = { Double.MIN_VALUE, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000, -10000, -100000,
-				-1000000, 0, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000, Double.MAX_VALUE };
+		double check[] = { Double.MIN_VALUE, -0.000001, -0.00001, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000,
+				-10000, -100000, -1000000, 0, 0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
+				100000, 1000000, Double.MAX_VALUE };
 		network.getActivation(0).activationFunction(check, 0, check.length);
 
 		Arrays.sort(check);
