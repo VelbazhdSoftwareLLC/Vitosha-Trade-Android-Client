@@ -40,8 +40,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 */
 	private static final int GAP_BETWEEN_PANELS = 10;
 
-	//TODO Put all colors in the settings dialog.
-	
+	// TODO Put all colors in the settings dialog.
+
 	/**
 	 * 
 	 */
@@ -242,9 +242,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
 		 * At the first index is the low value. At the second index is the high
 		 * value.
+		 * 
+		 * There is a problem with this approach, because some activation
+		 * functions are zero if the argument is infinity.
+		 * 
+		 * double lowHigh[] = { Double.MIN_VALUE, Double.MAX_VALUE };
+		 * network.getActivation(0).activationFunction(lowHigh, 0, 2);
 		 */
-		double lowHigh[] = { Double.MIN_VALUE, Double.MAX_VALUE };
-		network.getActivation(0).activationFunction(lowHigh, 0, 2);
+		double lowHigh[] = { -1.0D, +1.0D };
 
 		/*
 		 * Prepare training set.
