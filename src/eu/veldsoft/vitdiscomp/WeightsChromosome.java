@@ -26,44 +26,83 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	private Train train = null;
 
 	/**
+	 * Constructor used to initialize the chromosome with array of values.
 	 * 
 	 * @param representation
+	 *            Values as array.
 	 * @param network
+	 *            Neural network reference.
 	 * @param train
+	 *            Neural network training strategy.
 	 * @throws InvalidRepresentationException
+	 *             Rise an exception if the values are not valid.
 	 */
 	public WeightsChromosome(Double[] representation, BasicNetwork network, Train train)
 			throws InvalidRepresentationException {
 		super(representation);
 		this.network = network;
 		this.train = train;
+
+		if (network == null) {
+			throw new RuntimeException("Neural network should be provided for the fitness evaluation.");
+		}
+
+		if (train == null) {
+			throw new RuntimeException("Training object should be provided for the fitness evaluation.");
+		}
 	}
 
 	/**
+	 * Constructor used to initialize the chromosome with list of values.
 	 * 
 	 * @param representation
+	 *            Values as list.
 	 * @param network
+	 *            Neural network reference.
 	 * @param train
+	 *            Neural network training strategy.
 	 * @throws InvalidRepresentationException
+	 *             Rise an exception if the values are not valid.
 	 */
 	public WeightsChromosome(List<Double> representation, BasicNetwork network, Train train)
 			throws InvalidRepresentationException {
 		super(representation);
 		this.network = network;
 		this.train = train;
+
+		if (network == null) {
+			throw new RuntimeException("Neural network should be provided for the fitness evaluation.");
+		}
+
+		if (train == null) {
+			throw new RuntimeException("Training object should be provided for the fitness evaluation.");
+		}
 	}
 
 	/**
+	 * Constructor used to initialize the chromosome with list of values.
 	 * 
 	 * @param representation
-	 * @param copyList
+	 *            Values as list.
+	 * @param copy
+	 *            Deep copy flag.
 	 * @param network
+	 *            Neural network reference.
 	 * @param train
+	 *            Neural network training strategy.
 	 */
-	public WeightsChromosome(List<Double> representation, boolean copyList, BasicNetwork network, Train train) {
-		super(representation, copyList);
+	public WeightsChromosome(List<Double> representation, boolean copy, BasicNetwork network, Train train) {
+		super(representation, copy);
 		this.network = network;
 		this.train = train;
+
+		if (network == null) {
+			throw new RuntimeException("Neural network should be provided for the fitness evaluation.");
+		}
+
+		if (train == null) {
+			throw new RuntimeException("Training object should be provided for the fitness evaluation.");
+		}
 	}
 
 	/**
@@ -105,8 +144,22 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 */
 	@Override
 	protected void checkValidity(List<Double> values) throws InvalidRepresentationException {
-		// TODO Length of the values should match the number of weights in the
-		// neural network structure.
+		/*
+		 * Length of the values should match the number of weights in the neural
+		 * network structure.
+		 */
+		int counter = 0;
+		for (int layer = 0; layer < network.getLayerCount() - 1; layer++) {
+			for (int from = 0; from < network.getLayerNeuronCount(layer); from++) {
+				for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++) {
+					counter++;
+				}
+			}
+		}
+
+		if (values == null || counter != values.size()) {
+			// TODO Report the size problem.
+		}
 	}
 
 	/**
@@ -116,5 +169,4 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	public AbstractListChromosome<Double> newFixedLengthChromosome(List<Double> values) {
 		return new WeightsChromosome(values, true, network, train);
 	}
-
 }
