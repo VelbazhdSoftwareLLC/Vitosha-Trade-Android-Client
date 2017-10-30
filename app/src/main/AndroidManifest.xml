@@ -1,12 +1,10 @@
 <manifest package="eu.veldsoft.vitdiscomp"
 
-          xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature
         android:name="android.software.live_wallpaper"
-        android:required="true" >
-    </uses-feature>
+        android:required="true"></uses-feature>
 
     <application
         android:allowBackup="true"
@@ -20,23 +18,21 @@
             android:name=".VitoshaTradeWallpaperService"
             android:enabled="true"
             android:label="@string/vitosha_trade_wallpaper_label"
-            android:permission="android.permission.BIND_WALLPAPER" >
+            android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" >
-                </action>
+                <action android:name="android.service.wallpaper.WallpaperService"></action>
             </intent-filter>
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/vitosha_trade_wallpaper" >
-            </meta-data>
+                android:resource="@xml/vitosha_trade_wallpaper"></meta-data>
         </service>
 
         <activity
             android:name=".OptionsActivity"
             android:label="@string/title_activity_options"
             android:launchMode="singleInstance"
-            android:noHistory="true" >
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
