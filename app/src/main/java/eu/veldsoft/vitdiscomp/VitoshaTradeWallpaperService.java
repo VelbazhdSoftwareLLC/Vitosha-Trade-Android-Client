@@ -41,6 +41,16 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
      */
     private static final int GAP_BETWEEN_PANELS = 10;
 
+    /**
+     *
+     */
+    private static final int IMAGES_IDS[] = {
+            R.drawable.vitosha_mountain_dimitar_petarchev_001,
+            R.drawable.vitosha_mountain_dimitar_petarchev_002,
+            R.drawable.vitosha_mountain_dimitar_petarchev_003,
+            R.drawable.vitosha_mountain_dimitar_petarchev_004,
+    };
+
     // TODO Put all colors in the settings dialog.
 
     /**
@@ -88,11 +98,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
      *
      */
     private static boolean visible = false;
-
-    /**
-     *
-     */
-    private static Bitmap images[] = null;
 
     /**
      *
@@ -242,7 +247,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         // data.generate();
 
 		/*
-		 * Normalize data.
+         * Normalize data.
 		 */
         double min = values[0];
         double max = values[0];
@@ -256,7 +261,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
 		/*
-		 * At the first index is the low value. At the second index is the high
+         * At the first index is the low value. At the second index is the high
 		 * value.
 		 * 
 		 * There is a problem with this approach, because some activation
@@ -347,10 +352,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
          * @param canvas
          */
         private void drawBackgroud(Canvas canvas) {
+            // TODO Images should be loaded from an image server.
 			/*
 			 * Change picture according the day in the year.
 			 */
-            Bitmap image = images[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % images.length];
+            Bitmap image = BitmapFactory.decodeResource(VitoshaTradeWallpaperService.this.getResources(), IMAGES_IDS[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % IMAGES_IDS.length]);
 
 			/*
 			 * Select random top-left corner for image clip.
@@ -518,7 +524,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
          *
          */
         private void draw() {
-            if (images == null) {
+            if (IMAGES_IDS == null) {
                 return;
             }
 
@@ -756,19 +762,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
      */
     @Override
     public Engine onCreateEngine() {
-        // TODO Find better place to initialize images.
-        if (images == null) {
-            images = new Bitmap[]{
-                    BitmapFactory.decodeResource(this.getResources(),
-                            R.drawable.vitosha_mountain_dimitar_petarchev_001),
-                    BitmapFactory.decodeResource(this.getResources(),
-                            R.drawable.vitosha_mountain_dimitar_petarchev_002),
-                    BitmapFactory.decodeResource(this.getResources(),
-                            R.drawable.vitosha_mountain_dimitar_petarchev_003),
-                    BitmapFactory.decodeResource(this.getResources(),
-                            R.drawable.vitosha_mountain_dimitar_petarchev_004),};
-        }
-
         return new WallpaperEngine();
     }
 }

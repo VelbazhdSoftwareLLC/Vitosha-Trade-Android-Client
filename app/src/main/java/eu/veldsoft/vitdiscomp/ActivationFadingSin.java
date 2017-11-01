@@ -79,7 +79,7 @@ class ActivationFadingSin implements ActivationFunction {
     @Override
     public String getFactoryCode() {
         /*
-		 * Return null if you do not care to be support for creating of your
+         * Return null if you do not care to be support for creating of your
 		 * activation through factory.
 		 */
         return null;

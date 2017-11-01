@@ -120,7 +120,7 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
         }
 
 		/*
-		 * Iterate over the training set in order to calculate network error.
+         * Iterate over the training set in order to calculate network error.
 		 */
         train.iteration();
 
