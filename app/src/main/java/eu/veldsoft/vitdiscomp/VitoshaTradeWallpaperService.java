@@ -13,6 +13,7 @@ import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
 import org.encog.engine.network.activation.ActivationFunction;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -28,21 +29,29 @@ import java.util.Map;
 import java.util.Random;
 
 /**
+ * Background calculation unit.
+ *
  * @author Todor Balabanov
  */
 public class VitoshaTradeWallpaperService extends WallpaperService {
     /**
-     *
+     * Pseudo-random number generator.
      */
     private static final Random PRNG = new Random();
 
     /**
-     *
+     * Space between visual spots in pixels.
      */
     private static final int GAP_BETWEEN_PANELS = 10;
 
     /**
-     *
+     * Defaul training time delay.
+     */
+    private static final long DEFAULT_DELAY = 86400000L;
+
+    //TODO Images should be loaded from a remote image server.
+    /**
+     * Identifiers for the backgourd resources images to be used as backgroud.
      */
     private static final int IMAGES_IDS[] = {
             R.drawable.vitosha_mountain_dimitar_petarchev_001,
@@ -54,84 +63,86 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     // TODO Put all colors in the settings dialog.
 
     /**
-     *
+     * Panel backgroud color in order to be a part transperent from the real background.
      */
     private static final int PANEL_BACKGROUND_COLOR = Color.argb(63, 0, 0, 0);
 
     /**
-     *
+     * Text color to be used in panels.
      */
     private static final int PANEL_TEXT_COLOR = Color.argb(95, 255, 255, 255);
 
     /**
-     *
+     * Colors used in the charts.
      */
     private static final int CHART_COLORS[] = {Color.argb(95, 0, 255, 0), Color.argb(95, 255, 0, 0)};
 
     /**
-     *
+     * Colors used to visualize neural networks.
      */
     private static final int ANN_COLORS[] = {Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
             Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0)};
 
     /**
-     *
+     * Time delay between neural network trainings.
      */
     private static long delay = 0;
 
     /**
-     *
+     * Panels size in pixels.
      */
     private static int panelsSideSize = 0;
 
     /**
-     *
+     * Visible surface width.
      */
     private static int width = 0;
 
     /**
-     *
+     * Visible surface height.
      */
     private static int height = 0;
 
     /**
-     *
+     * Wallpaper visibility flag.
      */
     private static boolean visible = false;
 
     /**
-     *
+     * List of information panels rectangles information.
      */
     private static Rect panels[] = {new Rect(), new Rect(), new Rect()};
 
     /**
-     *
+     * Neural network object.
      */
     private static BasicNetwork network = new BasicNetwork();
 
     /**
-     *
+     * Training examples data set.
      */
     private static MLDataSet examples = null;
 
     /**
-     *
+     * Forcasted data.
      */
     private static MLData forecast = null;
 
     /**
-     *
+     * Calculated output data.
      */
     private static MLData output = null;
 
     /**
-     *
+     * Training rule object.
      */
     private static ResilientPropagation train = null;
 
     /**
-     * @param activation
-     * @return
+     * Lowest and highest values in the time series.
+     *
+     * @param activation Activation function object.
+     * @return Array with two values - loeset in the first index and highest in the second index.
      */
     private static double[] findLowAndHigh(ActivationFunction activation) {
         double check[] = {Double.MIN_VALUE, -0.000001, -0.00001, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000,
@@ -149,14 +160,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
      */
     static {
         // TODO Load ANN structure from the remote server.
-        Map<Integer, Integer> counters = new HashMap<Integer, Integer>();
+        Map<NeuronType, Integer> counters = new HashMap<NeuronType, Integer>();
         counters.put(NeuronType.REGULAR, 0);
         counters.put(NeuronType.BIAS, 0);
         counters.put(NeuronType.INPUT, 0);
         counters.put(NeuronType.OUTPUT, 0);
 
         for (int type : InputData.NEURONS) {
-            counters.put(type, counters.get(type) + 1);
+            counters.put(NeuronType.valueOf(type), counters.get(type) + 1);
         }
 
         int inputSize = counters.get(NeuronType.INPUT);
@@ -167,8 +178,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
          * Network construction.
 		 */
         network.addLayer(new BasicLayer(null, true, inputSize));
-        network.addLayer(new BasicLayer(new ActivationExponentRegulatedSin(inputSize), true, hiddenSize));
-        network.addLayer(new BasicLayer(new ActivationExponentRegulatedSin(hiddenSize), false, outputSize));
+        network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenSize));
+        network.addLayer(new BasicLayer(new ActivationTANH(), false, outputSize));
         network.getStructure().finalizeStructure();
         network.reset();
 
@@ -270,7 +281,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         double lowHigh[] = findLowAndHigh(network.getActivation(0));
 
 		/*
-		 * Prepare training set.
+         * Prepare training set.
 		 */
         double input[][] = new double[values.length - (inputSize + outputSize)][inputSize];
         double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
@@ -296,21 +307,23 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     }
 
     /**
+     * Wallpaper engine class.
+     *
      * @author Todor Balabanov
      */
     private class WallpaperEngine extends Engine {
         /**
-         *
+         * Thread handler.
          */
         private final Handler handler = new Handler();
 
         /**
-         *
+         * Paint object.
          */
         private final Paint paint = new Paint();
 
         /**
-         *
+         * Neural network training cicle thread.
          */
         private final Runnable trainer = new Runnable() {
             @Override
@@ -322,7 +335,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         };
 
         /**
-         *
+         * Single neural network training cycle.
          */
         private void train() {
             if (network == null) {
@@ -338,7 +351,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         *
+         * Neural network prediction getter.
          */
         private void predict() {
             if (forecast == null) {
@@ -349,7 +362,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         * @param canvas
+         * Background drawing procedure.
+         *
+         * @param canvas Canvas object for background.
          */
         private void drawBackgroud(Canvas canvas) {
             // TODO Images should be loaded from an image server.
@@ -372,7 +387,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         * @param canvas
+         * Panels drawing procedure.
+         *
+         * @param canvas Canvas object for panels drawing.
          */
         private void drawPanels(Canvas canvas) {
 			/*
@@ -385,7 +402,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         * @param canvas
+         * Currency pair info drawing procedure.
+         *
+         * @param canvas Canvas object for currency pair info drawing.
          */
         private void drawCurrencyPairInfo(Canvas canvas) {
 			/*
@@ -401,7 +420,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         * @param canvas
+         * Forecast drawing procedure.
+         *
+         * @param canvas Canvas object for forecast drawing.
          */
         private void drawForecast(Canvas canvas) {
 			/*
@@ -430,7 +451,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         * @param canvas
+         * Neural networ drawing procedure.
+         *
+         * @param canvas Canvas object for neural network drawing.
          */
         private void drawAnn(Canvas canvas) {
 			/*
@@ -521,13 +544,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         *
+         * Common dtrawing procedure.
          */
         private void draw() {
-            if (IMAGES_IDS == null) {
-                return;
-            }
-
             SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
 
@@ -558,7 +577,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         }
 
         /**
-         *
+         * Constructor without parameters.
          */
         public WallpaperEngine() {
             super();
@@ -573,6 +592,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         public void onVisibilityChanged(boolean visible) {
             VitoshaTradeWallpaperService.visible = visible;
 
+            /*
+             * Do calculations only if the wallpaper is visible.
+             */
             if (visible == true) {
                 handler.post(trainer);
             } else {
@@ -604,6 +626,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
                     .getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
 
             panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
+
             switch (preferences.getString("positioning", "0 0")) {
                 case "lt":
                     panels[0].left = GAP_BETWEEN_PANELS;
@@ -752,8 +775,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
                 default:
                     break;
             }
-            delay = Long.parseLong(preferences.getString("loading", "" + 86400000));
 
+            delay = Long.parseLong(preferences.getString("loading", "" + DEFAULT_DELAY));
         }
     }
 

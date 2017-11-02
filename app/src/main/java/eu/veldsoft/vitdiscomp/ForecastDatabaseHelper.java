@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
  *
  * @author Todor Balabanov
  */
-public class ForecastDatabaseHelper extends SQLiteOpenHelper {
+class ForecastDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Rates table columns description class.
      *

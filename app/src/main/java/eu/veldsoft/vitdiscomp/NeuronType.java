@@ -3,44 +3,84 @@ package eu.veldsoft.vitdiscomp;
 /**
  * @author Todor Balabanov
  */
-final class NeuronType {
+enum NeuronType {
+
     /**
      * Regular neuron flag.
      */
-    final static int REGULAR = 0x00;
+    REGULAR(0x00),
 
     /**
      * Bias neuron flag.
      */
-    final static int BIAS = 0x01;
+    BIAS(0x01),
 
     /**
      * Input neuron flag.
      */
-    final static int INPUT = 0x02;
+    INPUT(0x02),
 
     /**
      * Input and bias neuron flag.
      */
-    final static int INPUT_BIAS = 0x03;
+    INPUT_BIAS(0x03),
 
     /**
      * Output neuron flag.
      */
-    final static int OUTPUT = 0x04;
+    OUTPUT(0x04),
 
     /**
      * Output and bias neuron flag.
      */
-    final static int OUTPUT_BIAS = 0x05;
+    OUTPUT_BIAS(0x05),
 
     /**
      * Output and input neuron flag.
      */
-    final static int OUTPUT_INPUT = 0x06;
+    OUTPUT_INPUT(0x06),
 
     /**
      * Output, input and bias neuron flag.
      */
-    final static int OUTPUT_INPUT_BIAS = 0x07;
+    OUTPUT_INPUT_BIAS(0x07);
+
+    /*
+     * Numeric value representation.
+     */
+    private final int value;
+
+    /**
+     * Value factory function.
+     *
+     * @param type Numerical type representation.
+     * @return Corresponding enumeration or regular if there is no corespondence.
+     */
+    public static NeuronType valueOf(int type) {
+        for (NeuronType item : NeuronType.values()) {
+            if (item.value() == type) {
+                return item;
+            }
+        }
+
+        return REGULAR;
+    }
+
+    /**
+     * Constructor with all parameters.
+     *
+     * @param value
+     */
+    private NeuronType(int value) {
+        this.value = value;
+    }
+
+    /**
+     * Value getter.
+     *
+     * @return Numeric representation of the type.
+     */
+    public int value() {
+        return value;
+    }
 }

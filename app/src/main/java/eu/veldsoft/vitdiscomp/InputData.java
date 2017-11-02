@@ -6,7 +6,7 @@ package eu.veldsoft.vitdiscomp;
  *
  * @author Todor Balabanov
  */
-public class InputData {
+class InputData {
     public static final String SYMBOL = "SIN";
     public static final int PERIOD = 1;
     public static final long TIME[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,

@@ -132,7 +132,7 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
      */
     @Override
     protected void checkValidity(List<Double> values) throws InvalidRepresentationException {
-		/*
+        /*
 		 * Length of the values should match the number of weights in the neural
 		 * network structure.
 		 */

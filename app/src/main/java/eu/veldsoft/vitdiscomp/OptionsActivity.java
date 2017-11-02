@@ -9,8 +9,16 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.SwitchPreference;
 
+/**
+ * Options screen.
+ *
+ * @author Todor Balabanov
+ */
 public class OptionsActivity extends PreferenceActivity {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
