@@ -167,7 +167,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         counters.put(NeuronType.OUTPUT, 0);
 
         for (int type : InputData.NEURONS) {
-            counters.put(NeuronType.valueOf(type), counters.get(type) + 1);
+            counters.put(NeuronType.valueOf(type), counters.get(NeuronType.valueOf(type)) + 1);
         }
 
         int inputSize = counters.get(NeuronType.INPUT);

@@ -29,20 +29,26 @@ public class OptionsActivity extends PreferenceActivity {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object value) {
                         if (value == null) {
+                            OptionsActivity.this.finish();
                             return false;
                         }
 
                         if (value instanceof Boolean == false) {
+                            OptionsActivity.this.finish();
                             return false;
                         }
 
                         if (((Boolean) value) == false) {
                             // TODO Remove our wall paper.
-                            return false;
+                            OptionsActivity.this.finish();
+                            return true;
                         } else {
                             ((SwitchPreference) preference).setChecked(false);
                         }
 
+                        /*
+                         * Run wallpaper service.
+                         */
                         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
                         intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
                                 new ComponentName(OptionsActivity.this, VitoshaTradeWallpaperService.class));
@@ -50,7 +56,7 @@ public class OptionsActivity extends PreferenceActivity {
 
                         OptionsActivity.this.finish();
 
-                        return false;
+                        return true;
                     }
                 });
     }
