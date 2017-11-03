@@ -139,19 +139,33 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     private static ResilientPropagation train = null;
 
     /**
-     * Lowest and highest values in the time series.
+     * Lowest and highest values of partucular activation function. It is used for time series scaling.
      *
      * @param activation Activation function object.
+     *
      * @return Array with two values - loeset in the first index and highest in the second index.
      */
     private static double[] findLowAndHigh(ActivationFunction activation) {
+        /*
+         * Use range of double values.
+         */
         double check[] = {Double.MIN_VALUE, -0.000001, -0.00001, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000,
                 -10000, -100000, -1000000, 0, 0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
                 100000, 1000000, Double.MAX_VALUE};
+
+        /*
+         * Map the range of double values to activation function output.
+         */
         network.getActivation(0).activationFunction(check, 0, check.length);
 
+        /*
+         * Soft the result of the activation fuction output.
+         */
         Arrays.sort(check);
 
+        /*
+         * Return minimum and maximum values of the activation function output.
+         */
         return new double[]{check[0], check[check.length - 1]};
     }
 
@@ -278,7 +292,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * There is a problem with this approach, because some activation
 		 * functions are zero if the argument is infinity.
 		 */
-        double lowHigh[] = findLowAndHigh(network.getActivation(0));
+        double activationRange[] = findLowAndHigh(network.getActivation(0));
 
 		/*
          * Prepare training set.
@@ -287,10 +301,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
         for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
             for (int j = 0; j < inputSize; j++) {
-                input[i][j] = lowHigh[0] + (lowHigh[1] - lowHigh[0]) * (values[i + j] - min) / (max - min);
+                input[i][j] = activationRange[0] + (activationRange[1] - activationRange[0]) * (values[i + j] - min) / (max - min);
             }
             for (int j = 0; j < outputSize; j++) {
-                target[i][j] = lowHigh[0] + (lowHigh[1] - lowHigh[0]) * (values[i + inputSize + j] - min) / (max - min);
+                target[i][j] = activationRange[0] + (activationRange[1] - activationRange[0]) * (values[i + inputSize + j] - min) / (max - min);
             }
         }
         examples = new BasicMLDataSet(input, target);
@@ -300,8 +314,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
         input = new double[1][inputSize];
         for (int j = 0; j < inputSize; j++) {
-            input[0][j] = lowHigh[0]
-                    + (lowHigh[1] - lowHigh[0]) * (values[values.length - inputSize + j] - min) / (max - min);
+            input[0][j] = activationRange[0]
+                    + (activationRange[1] - activationRange[0]) * (values[values.length - inputSize + j] - min) / (max - min);
         }
         forecast = new BasicMLData(input[0]);
     }
@@ -555,13 +569,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
                 if (canvas != null) {
                     drawBackgroud(canvas);
-
                     drawPanels(canvas);
-
                     drawCurrencyPairInfo(canvas);
-
                     drawForecast(canvas);
-
                     drawAnn(canvas);
                 }
             } finally {

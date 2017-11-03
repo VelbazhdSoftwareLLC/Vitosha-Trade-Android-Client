@@ -40,4 +40,11 @@
         android:persistent="true"
         android:title="@string/panels_title" />
 
+    <Preference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:title="@string/close_title"
+        android:key="closing"
+        android:summary=""/>
+
 </PreferenceScreen>
