@@ -438,7 +438,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Time series info.
 			 */
-			int textSize = (panels[0].bottom-panels[0].top+1) / 5;
+			int textSize = (panels[0].bottom - panels[0].top) / 5;
 			paint.setTextSize(textSize);
 			paint.setColor(PANEL_TEXT_COLOR);
 			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS + panels[0].left,
@@ -644,8 +644,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 			handler.removeCallbacks(trainer);
 			if (visible == true) {
+				handler.postDelayed(trainer, delay);
 			}
-			handler.postDelayed(trainer, delay);
 		}
 
 		/**
