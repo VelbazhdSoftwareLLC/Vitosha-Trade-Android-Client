@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import org.encog.engine.network.activation.ActivationFunction;
@@ -89,19 +90,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static long delay = 0;
 
 	/**
-	 * Panels size in pixels.
-	 */
-	private static int panelsSideSize = 0;
-
-	/**
 	 * Visible surface width.
 	 */
-	private static int width = 0;
+	private static int screenWidth = 0;
 
 	/**
 	 * Visible surface height.
 	 */
-	private static int height = 0;
+	private static int screenHeight = 0;
 
 	/**
 	 * Wallpaper visibility flag.
@@ -255,7 +251,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		/*
-       * At the first index is the low value. At the second index is the high
+		 * At the first index is the low value. At the second index is the high
 		 * value.
 		 *
 		 * There is a problem with this approach, because some activation
@@ -263,7 +259,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 *
 		 * The fist layer has no activation function.
 		 */
-		double range[] = {-0.99, +0.99};
+		double range[] = findLowAndHigh(network.getActivation(2));
 
 		/*
        * Prepare training set.
@@ -408,14 +404,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Select random top-left corner for image clip.
 			 */
-			int left = PRNG.nextInt(image.getWidth() - width);
-			int top = PRNG.nextInt(image.getHeight() - height);
+			int left = PRNG.nextInt(image.getWidth() - screenWidth);
+			int top = PRNG.nextInt(image.getHeight() - screenHeight);
 
 			/*
 			 * Clip part of the image.
 			 */
-			canvas.drawBitmap(image, new Rect(left, top, left + width - 1, top + height - 1),
-					  new Rect(0, 0, width - 1, height - 1), null);
+			canvas.drawBitmap(image, new Rect(left, top, left + screenWidth - 1, top + screenHeight - 1),
+					  new Rect(0, 0, screenWidth - 1, screenHeight - 1), null);
 		}
 
 		/**
@@ -442,7 +438,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Time series info.
 			 */
-			int textSize = panelsSideSize / 5;
+			int textSize = (panels[0].bottom-panels[0].top+1) / 5;
 			paint.setTextSize(textSize);
 			paint.setColor(PANEL_TEXT_COLOR);
 			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS + panels[0].left,
@@ -462,6 +458,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 */
 			int x = panels[1].left;
 			int y = panels[1].bottom;
+			int width = panels[1].right - panels[1].left;
+			int height = panels[1].bottom - panels[1].top;
+
+			/*
+			 * Output layer activation function is used because input layer has no activation function.
+			 */
+			double range[] = findLowAndHigh(network.getActivation(2));
 
 			/*
 			 * Total number of values to be visualized.
@@ -471,32 +474,24 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Visualize past data.
 			 */
-			{
-				//TODO Scaling is not wroking well.
-				double range[] = findLowAndHigh(network.getActivation(0));
-				paint.setColor(CHART_COLORS[0]);
-				for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
-					int offset = (int) ((forecast.getData()[i] - range[0]) * (range[1] - range[0]) * panelsSideSize);
-					for (int dx = 0; dx < panelsSideSize / numberOfValues; dx++) {
-						canvas.drawLine(x, y, x, y - offset, paint);
-						x++;
-					}
+			paint.setColor(CHART_COLORS[0]);
+			for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
+				int offset = (int) (height * (forecast.getData()[i] - range[0]) / (range[1] - range[0]));
+				for (int dx = 0; dx < width / numberOfValues; dx++) {
+					canvas.drawLine(x, y, x, y - offset, paint);
+					x++;
 				}
 			}
 
 			/*
 			 * Visualize future data.
 			 */
-			{
-				//TODO Scaling is not wroking well.
-				double range[] = findLowAndHigh(network.getActivation(2));
-				paint.setColor(CHART_COLORS[1]);
-				for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
-					int offset = (int) ((output.getData()[i] - range[0]) * (range[1] - range[0]) * panelsSideSize);
-					for (int dx = 0; dx < panelsSideSize / numberOfValues; dx++) {
-						canvas.drawLine(x, y, x, y - offset, paint);
-						x++;
-					}
+			paint.setColor(CHART_COLORS[1]);
+			for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
+				int offset = (int) (height * (output.getData()[i] - range[0]) / (range[1] - range[0]));
+				for (int dx = 0; dx < width / numberOfValues; dx++) {
+					canvas.drawLine(x, y, x, y - offset, paint);
+					x++;
 				}
 			}
 		}
@@ -510,10 +505,38 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Artificial neural network.
 			 */
-			double topology[][] = {forecast.getData(),
-					  new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
-					  new double[network.getLayerNeuronCount(1)],
-					  new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)], output.getData()};
+			double topology[][] = {
+				forecast.getData(),
+				new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
+				new double[network.getLayerNeuronCount(1)],
+				new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
+				output.getData()
+			};
+
+			/*
+			 * At the first index is the low value. At the second index is the high
+			 * value.
+			 *
+			 * There is a problem with this approach, because some activation
+			 * functions are zero if the argument is infinity.
+			 *
+			 * The fist layer has no activation function.
+			 */
+			double range[] = findLowAndHigh(network.getActivation(2));
+
+			/*
+			 * Scale input layer data.
+			 */
+			for (int i = 0; i < topology[0].length; i++) {
+				topology[0][i] = (topology[0][i] - range[0]) / (range[1] - range[0]);
+			}
+
+			/*
+			 * Scale output layer data.
+			 */
+			for (int i = 0; i < topology[0].length; i++) {
+				topology[4][i] = (topology[4][i] - range[0]) / (range[1] - range[0]);
+			}
 
 			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
 				if (n >= network.getLayerNeuronCount(1)) {
@@ -577,11 +600,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Draw topology.
 			 */
-			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += panelsSideSize / ANN_COLORS.length, k++) {
-				for (int dx = 0; dx < panelsSideSize / ANN_COLORS.length; dx++) {
+			int width = panels[2].right - panels[2].left;
+			int height = panels[2].bottom - panels[2].top;
+			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += width / ANN_COLORS.length, k++) {
+				for (int dx = 0; dx < width / ANN_COLORS.length; dx++) {
 					for (int y = panels[2].top, l = 0; y < panels[2].bottom
-							  && l < topology[k].length; y += panelsSideSize / topology[k].length, l++) {
-						for (int dy = 0; dy < panelsSideSize / topology[k].length; dy++) {
+							  && l < topology[k].length; y += height / topology[k].length, l++) {
+						for (int dy = 0; dy < height / topology[k].length; dy++) {
 							paint.setColor(ANN_COLORS[k]);
 							paint.setColor(Color.argb(Color.alpha(ANN_COLORS[k]),
 									  (int) (Color.red(ANN_COLORS[k]) * topology[k][l]),
@@ -619,8 +644,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 			handler.removeCallbacks(trainer);
 			if (visible == true) {
-				handler.postDelayed(trainer, delay);
 			}
+			handler.postDelayed(trainer, delay);
 		}
 
 		/**
@@ -657,13 +682,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			super.onSurfaceChanged(holder, format, width, height);
 
-			VitoshaTradeWallpaperService.width = width;
-			VitoshaTradeWallpaperService.height = height;
+			screenWidth = width;
+			screenHeight = height;
 
 			SharedPreferences preferences = PreferenceManager
 					  .getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
 
-			panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
+			int panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
 
 			switch (preferences.getString("positioning", "0 0")) {
 				case "lt":
