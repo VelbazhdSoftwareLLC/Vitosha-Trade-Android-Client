@@ -534,7 +534,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			/*
 			 * Scale output layer data.
 			 */
-			for (int i = 0; i < topology[0].length; i++) {
+			for (int i = 0; i < topology[4].length; i++) {
 				topology[4][i] = (topology[4][i] - range[0]) / (range[1] - range[0]);
 			}
 
