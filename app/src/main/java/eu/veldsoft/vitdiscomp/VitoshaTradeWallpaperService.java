@@ -563,10 +563,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 
 			/*
-			 * Hidden layer values.
+			 * Hidden layer values. Activation function of the second layer is used for scaling.
 			 */
-			for (int i = 0; i < network.getLayerNeuronCount(1); i++) {
-				topology[2][i] = network.getLayerOutput(1, i);
+			range = findLowAndHigh(network.getActivation(1));
+			for (int i = 0; i < topology[2].length; i++) {
+				topology[2][i] = (network.getLayerOutput(1, i) - range[0]) / (range[1] - range[0]);
 			}
 
 			/*
