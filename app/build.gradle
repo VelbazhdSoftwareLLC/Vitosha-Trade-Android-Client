@@ -5,7 +5,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "eu.veldsoft.vitdiscomp"
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"

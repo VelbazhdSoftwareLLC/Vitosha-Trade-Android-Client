@@ -23,35 +23,37 @@ public class OptionsActivity extends PreferenceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.layout.activity_options);
+	}
 
-		getPreferenceScreen().findPreference("closing").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-			@Override
-			public boolean onPreferenceClick(Preference preference) {
-				SharedPreferences preferences = PreferenceManager
-						  .getDefaultSharedPreferences(OptionsActivity.this);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onPause() {
+		super.onPause();
+		SharedPreferences preferences = PreferenceManager
+				  .getDefaultSharedPreferences(OptionsActivity.this);
 
-                        /*
-								 * Remove our wallpaper.
-                         */
-				if (preferences.getBoolean("set_wallpaper", false) == false) {
-					OptionsActivity.this.finish();
-					stopService(new Intent(OptionsActivity.this, VitoshaTradeWallpaperService.class));
-					startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
+		/*
+		 * Remove our wallpaper.
+		 */
+		if (preferences.getBoolean("set_wallpaper", false) == false) {
+			stopService(new Intent(OptionsActivity.this,
+					  VitoshaTradeWallpaperService.class));
+			startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
+			OptionsActivity.this.finish();
 
-					return true;
-				}
+			return;
+		}
 
-                        /*
-								 * Run wallpaper service.
-                         */
-				OptionsActivity.this.finish();
-				Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-				intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-						  new ComponentName(OptionsActivity.this, VitoshaTradeWallpaperService.class));
-				startActivity(intent);
-
-				return true;
-			}
-		});
+		/*
+		 * Run wallpaper service.
+		 */
+		Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+		intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+				  new ComponentName(OptionsActivity.this,
+							 VitoshaTradeWallpaperService.class));
+		startActivity(intent);
+		OptionsActivity.this.finish();
 	}
 }
