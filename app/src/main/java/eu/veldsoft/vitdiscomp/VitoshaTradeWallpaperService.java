@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import org.encog.engine.network.activation.ActivationFunction;
@@ -35,6 +34,7 @@ import java.util.Random;
  * @author Todor Balabanov
  */
 public class VitoshaTradeWallpaperService extends WallpaperService {
+
 	/**
 	 * Pseudo-random number generator.
 	 */
@@ -52,7 +52,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 	//TODO Images should be loaded from a remote image server.
 	/**
-	 * Identifiers for the backgourd resources images to be used as backgroud.
+	 * Identifiers for the backgourd resources images to be used as background.
 	 */
 	private static final int IMAGES_IDS[] = {
 			  R.drawable.vitosha_mountain_dimitar_petarchev_001,
@@ -66,23 +66,31 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	/**
 	 * Panel backgroud color in order to be a part transperent from the real background.
 	 */
-	private static final int PANEL_BACKGROUND_COLOR = Color.argb(63, 0, 0, 0);
+	private static final int PANEL_BACKGROUND_COLOR =
+			  Color.argb(63, 0, 0, 0);
 
 	/**
 	 * Text color to be used in panels.
 	 */
-	private static final int PANEL_TEXT_COLOR = Color.argb(95, 255, 255, 255);
+	private static final int PANEL_TEXT_COLOR =
+			  Color.argb(95, 255, 255, 255);
 
 	/**
 	 * Colors used in the charts.
 	 */
-	private static final int CHART_COLORS[] = {Color.argb(95, 0, 255, 0), Color.argb(95, 255, 0, 0)};
+	private static final int CHART_COLORS[] = {
+			  Color.argb(95, 0, 255, 0),
+			  Color.argb(95, 255, 0, 0)};
 
 	/**
 	 * Colors used to visualize neural networks.
 	 */
-	private static final int ANN_COLORS[] = {Color.argb(95, 0, 255, 0), Color.argb(95, 255, 255, 255),
-			  Color.argb(95, 0, 0, 255), Color.argb(95, 255, 255, 255), Color.argb(95, 255, 0, 0)};
+	private static final int ANN_COLORS[] = {
+			  Color.argb(95, 0, 255, 0),
+			  Color.argb(95, 255, 255, 255),
+			  Color.argb(95, 0, 0, 255),
+			  Color.argb(95, 255, 255, 255),
+			  Color.argb(95, 255, 0, 0)};
 
 	/**
 	 * Time delay between neural network trainings.
@@ -146,7 +154,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		counters.put(NeuronType.OUTPUT, 0);
 
 		for (int type : InputData.NEURONS) {
-			counters.put(NeuronType.valueOf(type), counters.get(NeuronType.valueOf(type)) + 1);
+			counters.put(NeuronType.valueOf(type),
+					  counters.get(NeuronType.valueOf(type)) + 1);
 		}
 
 		int inputSize = counters.get(NeuronType.INPUT);
@@ -156,9 +165,12 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
 			* Network construction.
 		 */
-		network.addLayer(new BasicLayer(null, true, inputSize));
-		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenSize));
-		network.addLayer(new BasicLayer(new ActivationTANH(), false, outputSize));
+		network.addLayer(new BasicLayer(null,
+				  true, inputSize));
+		network.addLayer(new BasicLayer(new ActivationTANH(),
+				  true, hiddenSize));
+		network.addLayer(new BasicLayer(new ActivationTANH(),
+				  false, outputSize));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
@@ -237,7 +249,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		// data.generate();
 
 		/*
-			* Normalize data.
+		 * Normalize data.
 		 */
 		double min = values[0];
 		double max = values[0];
@@ -656,9 +668,9 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		public void onVisibilityChanged(boolean visible) {
 			VitoshaTradeWallpaperService.visible = visible;
 
-            /*
-             * Do calculations only if the wallpaper is visible.
-             */
+			/*
+			 * Do calculations only if the wallpaper is visible.
+			 */
 			if (visible == true) {
 				handler.post(trainer);
 			} else {
