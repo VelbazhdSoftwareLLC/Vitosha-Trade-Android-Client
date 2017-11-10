@@ -163,7 +163,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		int outputSize = counters.get(NeuronType.OUTPUT);
 
 		/*
-			* Network construction.
+		 * Network construction.
 		 */
 		network.addLayer(new BasicLayer(null,
 				  true, inputSize));
