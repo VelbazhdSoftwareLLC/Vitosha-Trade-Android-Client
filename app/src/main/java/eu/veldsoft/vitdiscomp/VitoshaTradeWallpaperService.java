@@ -276,14 +276,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
        * Prepare training set.
 		 */
-		double input[][] = new double[values.length - (inputSize + outputSize)][inputSize];
-		double target[][] = new double[values.length - (inputSize + outputSize)][outputSize];
+		double input[][] = new double[values.length -
+				  (inputSize + outputSize)][inputSize];
+		double target[][] = new double[values.length -
+				  (inputSize + outputSize)][outputSize];
 		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
 			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = range[0] + (range[1] - range[0]) * (values[i + j] - min) / (max - min);
+				input[i][j] = range[0] + (range[1] - range[0]) *
+						  (values[i + j] - min) / (max - min);
 			}
 			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = range[0] + (range[1] - range[0]) * (values[i + inputSize + j] - min) / (max - min);
+				target[i][j] = range[0] + (range[1] - range[0]) *
+						  (values[i + inputSize + j] - min) / (max - min);
 			}
 		}
 		examples = new BasicMLDataSet(input, target);
@@ -293,8 +297,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		input = new double[1][inputSize];
 		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = range[0]
-					  + (range[1] - range[0]) * (values[values.length - inputSize + j] - min) / (max - min);
+			input[0][j] = range[0] + (range[1] - range[0]) *
+					  (values[values.length - inputSize + j] - min) / (max - min);
 		}
 		forecast = new BasicMLData(input[0]);
 	}
@@ -309,8 +313,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		/*
 		 * Use range of double values.
 		 */
-		double check[] = {Double.MIN_VALUE, -0.000001, -0.00001, -0.0001, -0.001, -0.01, -0.1, -1, -10, -100, -1000,
-				  -10000, -100000, -1000000, 0, 0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
+		double check[] = {
+				  Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
+				  -0.001, -0.01, -0.1, -1, -10, -100, -1000,
+				  -10000, -100000, -1000000, 0, 0.000001, 0.00001,
+				  0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
 				  100000, 1000000, Double.MAX_VALUE};
 
 		/*
