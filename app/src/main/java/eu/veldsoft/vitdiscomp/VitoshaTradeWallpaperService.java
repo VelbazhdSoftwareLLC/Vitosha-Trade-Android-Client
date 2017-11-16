@@ -36,6 +36,534 @@ import java.util.Random;
 public class VitoshaTradeWallpaperService extends WallpaperService {
 
 	/**
+	 * Wallpaper engine class.
+	 *
+	 * @author Todor Balabanov
+	 */
+	private class WallpaperEngine extends Engine {
+
+		/**
+		 * Thread handler.
+		 */
+		private final Handler handler = new Handler();
+
+		/**
+		 * Paint object.
+		 */
+		private final Paint paint = new Paint();
+
+		/**
+		 * Neural network training cycle thread.
+		 */
+		private final Runnable trainer = new Runnable() {
+			@Override
+			public void run() {
+				predict();
+				draw();
+				train();
+			}
+		};
+
+		/**
+		 * Neural network prediction getter.
+		 */
+		private void predict() {
+			if (forecast == null) {
+				return;
+			}
+
+			output = network.compute(forecast);
+		}
+
+		/**
+		 * Common drawing procedure.
+		 */
+		private void draw() {
+			SurfaceHolder holder = getSurfaceHolder();
+			Canvas canvas = null;
+
+			try {
+				canvas = holder.lockCanvas();
+
+				if (canvas != null) {
+					drawBackground(canvas);
+					drawPanels(canvas);
+					drawCurrencyPairInfo(canvas);
+					drawForecast(canvas);
+					drawAnn(canvas);
+				}
+			} finally {
+				if (canvas != null) {
+					holder.unlockCanvasAndPost(canvas);
+				}
+			}
+
+			handler.removeCallbacks(trainer);
+			if (visible == true) {
+				handler.postDelayed(trainer, delay);
+			}
+		}
+
+		/**
+		 * Single neural network training cycle.
+		 */
+		private void train() {
+			if (network == null) {
+				return;
+			}
+			if (examples == null) {
+				return;
+			}
+
+			train = new ResilientPropagation(network, examples);
+			train.iteration();
+			train.finishTraining();
+		}
+
+		/**
+		 * Background drawing procedure.
+		 *
+		 * @param canvas Canvas object for background.
+		 */
+		private void drawBackground(Canvas canvas) {
+			// TODO Images should be loaded from an image server.
+			/*
+			 * Change picture according the day in the year.
+			 */
+			Bitmap image = BitmapFactory.decodeResource(
+					  VitoshaTradeWallpaperService.this.getResources(),
+					  IMAGES_IDS[Calendar.getInstance().
+								 get(Calendar.DAY_OF_YEAR) % IMAGES_IDS.length]);
+
+			/*
+			 * Select random top-left corner for image clip.
+			 */
+			int left = PRNG.nextInt(image.getWidth() - screenWidth);
+			int top = PRNG.nextInt(image.getHeight() - screenHeight);
+
+			/*
+			 * Clip part of the image.
+			 */
+			canvas.drawBitmap(image, new Rect(left, top,
+								 left + screenWidth - 1,
+								 top + screenHeight - 1),
+					  new Rect(0, 0, screenWidth - 1,
+								 screenHeight - 1), null);
+		}
+
+		/**
+		 * Panels drawing procedure.
+		 *
+		 * @param canvas Canvas object for panels drawing.
+		 */
+		private void drawPanels(Canvas canvas) {
+			/*
+			 * Panels.
+			 */
+			paint.setColor(PANEL_BACKGROUND_COLOR);
+			for (Rect rectangle : panels) {
+				canvas.drawRect(rectangle, paint);
+			}
+		}
+
+		/**
+		 * Currency pair info drawing procedure.
+		 *
+		 * @param canvas Canvas object for currency pair info drawing.
+		 */
+		private void drawCurrencyPairInfo(Canvas canvas) {
+			/*
+			 * Time series info.
+			 */
+			int textSize = (panels[0].bottom - panels[0].top) / 5;
+			paint.setTextSize(textSize);
+			paint.setColor(PANEL_TEXT_COLOR);
+			canvas.drawText("" + InputData.SYMBOL,
+					  GAP_BETWEEN_PANELS + panels[0].left,
+					  GAP_BETWEEN_PANELS + panels[0].top + textSize, paint);
+			canvas.drawText("" + TimePeriod.value(InputData.PERIOD),
+					  GAP_BETWEEN_PANELS + panels[0].left,
+					  GAP_BETWEEN_PANELS + panels[0].top + 2 * textSize, paint);
+		}
+
+		/**
+		 * Forecast drawing procedure.
+		 *
+		 * @param canvas Canvas object for forecast drawing.
+		 */
+		private void drawForecast(Canvas canvas) {
+			/*
+			 * Forecast.
+			 */
+			int x = panels[1].left;
+			int y = panels[1].bottom;
+			int width = panels[1].right - panels[1].left;
+			int height = panels[1].bottom - panels[1].top;
+
+			/*
+			 * Output layer activation function is used because input layer has no activation function.
+			 */
+			double range[] = findLowAndHigh(network.getActivation(2));
+
+			/*
+			 * Total number of values to be visualized.
+			 */
+			int numberOfValues = network.getLayerNeuronCount(0) + network.getLayerNeuronCount(2);
+
+			/*
+			 * Visualize past data.
+			 */
+			paint.setColor(CHART_COLORS[0]);
+			for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
+				int offset = (int) (height * (forecast.getData()[i] - range[0]) / (range[1] - range[0]));
+				for (int dx = 0; dx < width / numberOfValues; dx++) {
+					canvas.drawLine(x, y, x, y - offset, paint);
+					x++;
+				}
+			}
+
+			/*
+			 * Visualize future data.
+			 */
+			paint.setColor(CHART_COLORS[1]);
+			for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
+				int offset = (int) (height * (output.getData()[i] - range[0]) / (range[1] - range[0]));
+				for (int dx = 0; dx < width / numberOfValues; dx++) {
+					canvas.drawLine(x, y, x, y - offset, paint);
+					x++;
+				}
+			}
+		}
+
+		/**
+		 * Neural networ drawing procedure.
+		 *
+		 * @param canvas Canvas object for neural network drawing.
+		 */
+		private void drawAnn(Canvas canvas) {
+			/*
+			 * Artificial neural network.
+			 */
+			double topology[][] = {
+					  forecast.getData(),
+					  new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
+					  new double[network.getLayerNeuronCount(1)],
+					  new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
+					  output.getData()
+			};
+
+			/*
+			 * At the first index is the low value. At the second index is the high
+			 * value.
+			 *
+			 * There is a problem with this approach, because some activation
+			 * functions are zero if the argument is infinity.
+			 *
+			 * The fist layer has no activation function.
+			 */
+			double range[] = findLowAndHigh(network.getActivation(2));
+
+			/*
+			 * Scale input layer data.
+			 */
+			for (int i = 0; i < topology[0].length; i++) {
+				topology[0][i] = (topology[0][i] - range[0]) / (range[1] - range[0]);
+			}
+
+			/*
+			 * Scale output layer data.
+			 */
+			for (int i = 0; i < topology[4].length; i++) {
+				topology[4][i] = (topology[4][i] - range[0]) / (range[1] - range[0]);
+			}
+
+			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
+				if (n >= network.getLayerNeuronCount(1)) {
+					n = 0;
+					m++;
+				}
+				if (m >= network.getLayerNeuronCount(0)) {
+					m = 0;
+				}
+				topology[1][i] = network.getWeight(0, m, n);
+				n++;
+			}
+
+			for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
+				if (n >= network.getLayerNeuronCount(2)) {
+					n = 0;
+					m++;
+				}
+				if (m >= network.getLayerNeuronCount(1)) {
+					m = 0;
+				}
+				topology[3][i] = network.getWeight(1, m, n);
+				n++;
+			}
+
+			/*
+			 * Hidden layer values. Activation function of the second layer is used for scaling.
+			 */
+			range = findLowAndHigh(network.getActivation(1));
+			for (int i = 0; i < topology[2].length; i++) {
+				topology[2][i] = (network.getLayerOutput(1, i) - range[0]) / (range[1] - range[0]);
+			}
+
+			/*
+			 * Normalize weights.
+			 */
+			double min = Double.MAX_VALUE;
+			double max = Double.MIN_VALUE;
+			for (double value : topology[1]) {
+				if (value < min) {
+					min = value;
+				}
+				if (value > max) {
+					max = value;
+				}
+			}
+			for (double value : topology[3]) {
+				if (value < min) {
+					min = value;
+				}
+				if (value > max) {
+					max = value;
+				}
+			}
+			for (int i = 0; i < topology[1].length; i++) {
+				topology[1][i] = (topology[1][i] - min) / (max - min);
+			}
+			for (int i = 0; i < topology[3].length; i++) {
+				topology[3][i] = (topology[3][i] - min) / (max - min);
+			}
+
+			/*
+			 * Draw topology.
+			 */
+			int width = panels[2].right - panels[2].left;
+			int height = panels[2].bottom - panels[2].top;
+			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += width / ANN_COLORS.length, k++) {
+				for (int dx = 0; dx < width / ANN_COLORS.length; dx++) {
+					for (int y = panels[2].top, l = 0; y < panels[2].bottom
+							  && l < topology[k].length; y += height / topology[k].length, l++) {
+						for (int dy = 0; dy < height / topology[k].length; dy++) {
+							paint.setColor(ANN_COLORS[k]);
+							paint.setColor(Color.argb(Color.alpha(ANN_COLORS[k]),
+									  (int) (Color.red(ANN_COLORS[k]) * topology[k][l]),
+									  (int) (Color.green(ANN_COLORS[k]) * topology[k][l]),
+									  (int) (Color.blue(ANN_COLORS[k]) * topology[k][l])));
+							canvas.drawPoint(x + dx, y + dy, paint);
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Constructor without parameters.
+		 */
+		public WallpaperEngine() {
+			super();
+
+			handler.post(trainer);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void onVisibilityChanged(boolean visible) {
+			VitoshaTradeWallpaperService.visible = visible;
+
+			/*
+			 * Do calculations only if the wallpaper is visible.
+			 */
+			if (visible == true) {
+				handler.post(trainer);
+			} else {
+				handler.removeCallbacks(trainer);
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void onSurfaceDestroyed(SurfaceHolder holder) {
+			super.onSurfaceDestroyed(holder);
+			VitoshaTradeWallpaperService.visible = false;
+			handler.removeCallbacks(trainer);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+			super.onSurfaceChanged(holder, format, width, height);
+
+			screenWidth = width;
+			screenHeight = height;
+
+			SharedPreferences preferences = PreferenceManager
+					  .getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
+
+			int panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
+
+			switch (preferences.getString("positioning", "0 0")) {
+				case "lt":
+					panels[0].left = GAP_BETWEEN_PANELS;
+					panels[0].top = GAP_BETWEEN_PANELS;
+					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+					panels[1].left = GAP_BETWEEN_PANELS;
+					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+					panels[2].left = GAP_BETWEEN_PANELS;
+					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
+					break;
+				case "ct":
+					panels[0].left = width / 2 - panelsSideSize / 2;
+					panels[0].top = GAP_BETWEEN_PANELS;
+					panels[0].right = width / 2 + panelsSideSize / 2;
+					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+					panels[1].left = width / 2 - panelsSideSize / 2;
+					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].right = width / 2 + panelsSideSize / 2;
+					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+					panels[2].left = width / 2 - panelsSideSize / 2;
+					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+					panels[2].right = width / 2 + panelsSideSize / 2;
+					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
+					break;
+				case "rt":
+					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[0].top = GAP_BETWEEN_PANELS;
+					panels[0].right = width - GAP_BETWEEN_PANELS;
+					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
+
+					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].right = width - GAP_BETWEEN_PANELS;
+					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+
+					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
+					panels[2].right = width - GAP_BETWEEN_PANELS;
+					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
+					break;
+				case "lc":
+					panels[0].left = GAP_BETWEEN_PANELS;
+					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+
+					panels[1].left = GAP_BETWEEN_PANELS;
+					panels[1].top = height / 2 - panelsSideSize / 2;
+					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].bottom = height / 2 + panelsSideSize / 2;
+
+					panels[2].left = GAP_BETWEEN_PANELS;
+					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					break;
+				case "cc":
+					panels[0].left = width / 2 - panelsSideSize / 2;
+					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].right = width / 2 + panelsSideSize / 2;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+
+					panels[1].left = width / 2 - panelsSideSize / 2;
+					panels[1].top = height / 2 - panelsSideSize / 2;
+					panels[1].right = width / 2 + panelsSideSize / 2;
+					panels[1].bottom = height / 2 + panelsSideSize / 2;
+
+					panels[2].left = width / 2 - panelsSideSize / 2;
+					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].right = width / 2 + panelsSideSize / 2;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					break;
+				case "rc":
+					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].right = width - GAP_BETWEEN_PANELS;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+
+					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[1].top = height / 2 - panelsSideSize / 2;
+					panels[1].right = width - GAP_BETWEEN_PANELS;
+					panels[1].bottom = height / 2 + panelsSideSize / 2;
+
+					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].right = width - GAP_BETWEEN_PANELS;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					break;
+				case "lb":
+					panels[0].left = GAP_BETWEEN_PANELS;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+
+					panels[1].left = GAP_BETWEEN_PANELS;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+
+					panels[2].left = GAP_BETWEEN_PANELS;
+					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = height - GAP_BETWEEN_PANELS;
+					break;
+				case "cb":
+					panels[0].left = width / 2 - panelsSideSize / 2;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].right = width / 2 + panelsSideSize / 2;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+
+					panels[1].left = width / 2 - panelsSideSize / 2;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].right = width / 2 + panelsSideSize / 2;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+
+					panels[2].left = width / 2 - panelsSideSize / 2;
+					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[2].right = width / 2 + panelsSideSize / 2;
+					panels[2].bottom = height - GAP_BETWEEN_PANELS;
+					break;
+				case "rb":
+					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].right = width - GAP_BETWEEN_PANELS;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+
+					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].right = width - GAP_BETWEEN_PANELS;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+
+					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
+					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[2].right = width - GAP_BETWEEN_PANELS;
+					panels[2].bottom = height - GAP_BETWEEN_PANELS;
+					break;
+				default:
+					break;
+			}
+
+			delay = Long.parseLong(preferences.getString("loading", "" + DEFAULT_DELAY));
+		}
+	}
+
+	/**
 	 * Pseudo-random number generator.
 	 */
 	private static final Random PRNG = new Random();
@@ -342,524 +870,5 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	@Override
 	public Engine onCreateEngine() {
 		return new WallpaperEngine();
-	}
-
-	/**
-	 * Wallpaper engine class.
-	 *
-	 * @author Todor Balabanov
-	 */
-	private class WallpaperEngine extends Engine {
-		/**
-		 * Thread handler.
-		 */
-		private final Handler handler = new Handler();
-
-		/**
-		 * Paint object.
-		 */
-		private final Paint paint = new Paint();
-
-		/**
-		 * Neural network training cicle thread.
-		 */
-		private final Runnable trainer = new Runnable() {
-			@Override
-			public void run() {
-				predict();
-				draw();
-				train();
-			}
-		};
-
-		/**
-		 * Constructor without parameters.
-		 */
-		public WallpaperEngine() {
-			super();
-
-			handler.post(trainer);
-		}
-
-		/**
-		 * Single neural network training cycle.
-		 */
-		private void train() {
-			if (network == null) {
-				return;
-			}
-			if (examples == null) {
-				return;
-			}
-
-			train = new ResilientPropagation(network, examples);
-			train.iteration();
-			train.finishTraining();
-		}
-
-		/**
-		 * Neural network prediction getter.
-		 */
-		private void predict() {
-			if (forecast == null) {
-				return;
-			}
-
-			output = network.compute(forecast);
-		}
-
-		/**
-		 * Background drawing procedure.
-		 *
-		 * @param canvas Canvas object for background.
-		 */
-		private void drawBackgroud(Canvas canvas) {
-			// TODO Images should be loaded from an image server.
-			/*
-			 * Change picture according the day in the year.
-			 */
-			Bitmap image = BitmapFactory.decodeResource(VitoshaTradeWallpaperService.this.getResources(), IMAGES_IDS[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % IMAGES_IDS.length]);
-
-			/*
-			 * Select random top-left corner for image clip.
-			 */
-			int left = PRNG.nextInt(image.getWidth() - screenWidth);
-			int top = PRNG.nextInt(image.getHeight() - screenHeight);
-
-			/*
-			 * Clip part of the image.
-			 */
-			canvas.drawBitmap(image, new Rect(left, top, left + screenWidth - 1, top + screenHeight - 1),
-					  new Rect(0, 0, screenWidth - 1, screenHeight - 1), null);
-		}
-
-		/**
-		 * Panels drawing procedure.
-		 *
-		 * @param canvas Canvas object for panels drawing.
-		 */
-		private void drawPanels(Canvas canvas) {
-			/*
-			 * Panels.
-			 */
-			paint.setColor(PANEL_BACKGROUND_COLOR);
-			for (Rect rectangle : panels) {
-				canvas.drawRect(rectangle, paint);
-			}
-		}
-
-		/**
-		 * Currency pair info drawing procedure.
-		 *
-		 * @param canvas Canvas object for currency pair info drawing.
-		 */
-		private void drawCurrencyPairInfo(Canvas canvas) {
-			/*
-			 * Time series info.
-			 */
-			int textSize = (panels[0].bottom - panels[0].top) / 5;
-			paint.setTextSize(textSize);
-			paint.setColor(PANEL_TEXT_COLOR);
-			canvas.drawText("" + InputData.SYMBOL, GAP_BETWEEN_PANELS + panels[0].left,
-					  GAP_BETWEEN_PANELS + panels[0].top + textSize, paint);
-			canvas.drawText("" + TimePeriod.value(InputData.PERIOD), GAP_BETWEEN_PANELS + panels[0].left,
-					  GAP_BETWEEN_PANELS + panels[0].top + 2 * textSize, paint);
-		}
-
-		/**
-		 * Forecast drawing procedure.
-		 *
-		 * @param canvas Canvas object for forecast drawing.
-		 */
-		private void drawForecast(Canvas canvas) {
-			/*
-			 * Forecast.
-			 */
-			int x = panels[1].left;
-			int y = panels[1].bottom;
-			int width = panels[1].right - panels[1].left;
-			int height = panels[1].bottom - panels[1].top;
-
-			/*
-			 * Output layer activation function is used because input layer has no activation function.
-			 */
-			double range[] = findLowAndHigh(network.getActivation(2));
-
-			/*
-			 * Total number of values to be visualized.
-			 */
-			int numberOfValues = network.getLayerNeuronCount(0) + network.getLayerNeuronCount(2);
-
-			/*
-			 * Visualize past data.
-			 */
-			paint.setColor(CHART_COLORS[0]);
-			for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
-				int offset = (int) (height * (forecast.getData()[i] - range[0]) / (range[1] - range[0]));
-				for (int dx = 0; dx < width / numberOfValues; dx++) {
-					canvas.drawLine(x, y, x, y - offset, paint);
-					x++;
-				}
-			}
-
-			/*
-			 * Visualize future data.
-			 */
-			paint.setColor(CHART_COLORS[1]);
-			for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
-				int offset = (int) (height * (output.getData()[i] - range[0]) / (range[1] - range[0]));
-				for (int dx = 0; dx < width / numberOfValues; dx++) {
-					canvas.drawLine(x, y, x, y - offset, paint);
-					x++;
-				}
-			}
-		}
-
-		/**
-		 * Neural networ drawing procedure.
-		 *
-		 * @param canvas Canvas object for neural network drawing.
-		 */
-		private void drawAnn(Canvas canvas) {
-			/*
-			 * Artificial neural network.
-			 */
-			double topology[][] = {
-				forecast.getData(),
-				new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
-				new double[network.getLayerNeuronCount(1)],
-				new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
-				output.getData()
-			};
-
-			/*
-			 * At the first index is the low value. At the second index is the high
-			 * value.
-			 *
-			 * There is a problem with this approach, because some activation
-			 * functions are zero if the argument is infinity.
-			 *
-			 * The fist layer has no activation function.
-			 */
-			double range[] = findLowAndHigh(network.getActivation(2));
-
-			/*
-			 * Scale input layer data.
-			 */
-			for (int i = 0; i < topology[0].length; i++) {
-				topology[0][i] = (topology[0][i] - range[0]) / (range[1] - range[0]);
-			}
-
-			/*
-			 * Scale output layer data.
-			 */
-			for (int i = 0; i < topology[4].length; i++) {
-				topology[4][i] = (topology[4][i] - range[0]) / (range[1] - range[0]);
-			}
-
-			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
-				if (n >= network.getLayerNeuronCount(1)) {
-					n = 0;
-					m++;
-				}
-				if (m >= network.getLayerNeuronCount(0)) {
-					m = 0;
-				}
-				topology[1][i] = network.getWeight(0, m, n);
-				n++;
-			}
-
-			for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
-				if (n >= network.getLayerNeuronCount(2)) {
-					n = 0;
-					m++;
-				}
-				if (m >= network.getLayerNeuronCount(1)) {
-					m = 0;
-				}
-				topology[3][i] = network.getWeight(1, m, n);
-				n++;
-			}
-
-			/*
-			 * Hidden layer values. Activation function of the second layer is used for scaling.
-			 */
-			range = findLowAndHigh(network.getActivation(1));
-			for (int i = 0; i < topology[2].length; i++) {
-				topology[2][i] = (network.getLayerOutput(1, i) - range[0]) / (range[1] - range[0]);
-			}
-
-			/*
-			 * Normalize weights.
-			 */
-			double min = Double.MAX_VALUE;
-			double max = Double.MIN_VALUE;
-			for (double value : topology[1]) {
-				if (value < min) {
-					min = value;
-				}
-				if (value > max) {
-					max = value;
-				}
-			}
-			for (double value : topology[3]) {
-				if (value < min) {
-					min = value;
-				}
-				if (value > max) {
-					max = value;
-				}
-			}
-			for (int i = 0; i < topology[1].length; i++) {
-				topology[1][i] = (topology[1][i] - min) / (max - min);
-			}
-			for (int i = 0; i < topology[3].length; i++) {
-				topology[3][i] = (topology[3][i] - min) / (max - min);
-			}
-
-			/*
-			 * Draw topology.
-			 */
-			int width = panels[2].right - panels[2].left;
-			int height = panels[2].bottom - panels[2].top;
-			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += width / ANN_COLORS.length, k++) {
-				for (int dx = 0; dx < width / ANN_COLORS.length; dx++) {
-					for (int y = panels[2].top, l = 0; y < panels[2].bottom
-							  && l < topology[k].length; y += height / topology[k].length, l++) {
-						for (int dy = 0; dy < height / topology[k].length; dy++) {
-							paint.setColor(ANN_COLORS[k]);
-							paint.setColor(Color.argb(Color.alpha(ANN_COLORS[k]),
-									  (int) (Color.red(ANN_COLORS[k]) * topology[k][l]),
-									  (int) (Color.green(ANN_COLORS[k]) * topology[k][l]),
-									  (int) (Color.blue(ANN_COLORS[k]) * topology[k][l])));
-							canvas.drawPoint(x + dx, y + dy, paint);
-						}
-					}
-				}
-			}
-		}
-
-		/**
-		 * Common dtrawing procedure.
-		 */
-		private void draw() {
-			SurfaceHolder holder = getSurfaceHolder();
-			Canvas canvas = null;
-
-			try {
-				canvas = holder.lockCanvas();
-
-				if (canvas != null) {
-					drawBackgroud(canvas);
-					drawPanels(canvas);
-					drawCurrencyPairInfo(canvas);
-					drawForecast(canvas);
-					drawAnn(canvas);
-				}
-			} finally {
-				if (canvas != null) {
-					holder.unlockCanvasAndPost(canvas);
-				}
-			}
-
-			handler.removeCallbacks(trainer);
-			if (visible == true) {
-				handler.postDelayed(trainer, delay);
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void onVisibilityChanged(boolean visible) {
-			VitoshaTradeWallpaperService.visible = visible;
-
-			/*
-			 * Do calculations only if the wallpaper is visible.
-			 */
-			if (visible == true) {
-				handler.post(trainer);
-			} else {
-				handler.removeCallbacks(trainer);
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void onSurfaceDestroyed(SurfaceHolder holder) {
-			super.onSurfaceDestroyed(holder);
-			VitoshaTradeWallpaperService.visible = false;
-			handler.removeCallbacks(trainer);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-			super.onSurfaceChanged(holder, format, width, height);
-
-			screenWidth = width;
-			screenHeight = height;
-
-			SharedPreferences preferences = PreferenceManager
-					  .getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
-
-			int panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
-
-			switch (preferences.getString("positioning", "0 0")) {
-				case "lt":
-					panels[0].left = GAP_BETWEEN_PANELS;
-					panels[0].top = GAP_BETWEEN_PANELS;
-					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
-
-					panels[1].left = GAP_BETWEEN_PANELS;
-					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-
-					panels[2].left = GAP_BETWEEN_PANELS;
-					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
-					break;
-				case "ct":
-					panels[0].left = width / 2 - panelsSideSize / 2;
-					panels[0].top = GAP_BETWEEN_PANELS;
-					panels[0].right = width / 2 + panelsSideSize / 2;
-					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
-
-					panels[1].left = width / 2 - panelsSideSize / 2;
-					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].right = width / 2 + panelsSideSize / 2;
-					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-
-					panels[2].left = width / 2 - panelsSideSize / 2;
-					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-					panels[2].right = width / 2 + panelsSideSize / 2;
-					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
-					break;
-				case "rt":
-					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[0].top = GAP_BETWEEN_PANELS;
-					panels[0].right = width - GAP_BETWEEN_PANELS;
-					panels[0].bottom = panelsSideSize + GAP_BETWEEN_PANELS;
-
-					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[1].top = 2 * GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].right = width - GAP_BETWEEN_PANELS;
-					panels[1].bottom = 2 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-
-					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[2].top = 3 * GAP_BETWEEN_PANELS + 2 * panelsSideSize;
-					panels[2].right = width - GAP_BETWEEN_PANELS;
-					panels[2].bottom = 3 * GAP_BETWEEN_PANELS + 3 * panelsSideSize;
-					break;
-				case "lc":
-					panels[0].left = GAP_BETWEEN_PANELS;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
-
-					panels[1].left = GAP_BETWEEN_PANELS;
-					panels[1].top = height / 2 - panelsSideSize / 2;
-					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].bottom = height / 2 + panelsSideSize / 2;
-
-					panels[2].left = GAP_BETWEEN_PANELS;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
-					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
-					break;
-				case "cc":
-					panels[0].left = width / 2 - panelsSideSize / 2;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[0].right = width / 2 + panelsSideSize / 2;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
-
-					panels[1].left = width / 2 - panelsSideSize / 2;
-					panels[1].top = height / 2 - panelsSideSize / 2;
-					panels[1].right = width / 2 + panelsSideSize / 2;
-					panels[1].bottom = height / 2 + panelsSideSize / 2;
-
-					panels[2].left = width / 2 - panelsSideSize / 2;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
-					panels[2].right = width / 2 + panelsSideSize / 2;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
-					break;
-				case "rc":
-					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[0].right = width - GAP_BETWEEN_PANELS;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
-
-					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[1].top = height / 2 - panelsSideSize / 2;
-					panels[1].right = width - GAP_BETWEEN_PANELS;
-					panels[1].bottom = height / 2 + panelsSideSize / 2;
-
-					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
-					panels[2].right = width - GAP_BETWEEN_PANELS;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
-					break;
-				case "lb":
-					panels[0].left = GAP_BETWEEN_PANELS;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
-					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-
-					panels[1].left = GAP_BETWEEN_PANELS;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
-
-					panels[2].left = GAP_BETWEEN_PANELS;
-					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[2].bottom = height - GAP_BETWEEN_PANELS;
-					break;
-				case "cb":
-					panels[0].left = width / 2 - panelsSideSize / 2;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
-					panels[0].right = width / 2 + panelsSideSize / 2;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-
-					panels[1].left = width / 2 - panelsSideSize / 2;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-					panels[1].right = width / 2 + panelsSideSize / 2;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
-
-					panels[2].left = width / 2 - panelsSideSize / 2;
-					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[2].right = width / 2 + panelsSideSize / 2;
-					panels[2].bottom = height - GAP_BETWEEN_PANELS;
-					break;
-				case "rb":
-					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
-					panels[0].right = width - GAP_BETWEEN_PANELS;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-
-					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
-					panels[1].right = width - GAP_BETWEEN_PANELS;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
-
-					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
-					panels[2].right = width - GAP_BETWEEN_PANELS;
-					panels[2].bottom = height - GAP_BETWEEN_PANELS;
-					break;
-				default:
-					break;
-			}
-
-			delay = Long.parseLong(preferences.getString("loading", "" + DEFAULT_DELAY));
-		}
 	}
 }
