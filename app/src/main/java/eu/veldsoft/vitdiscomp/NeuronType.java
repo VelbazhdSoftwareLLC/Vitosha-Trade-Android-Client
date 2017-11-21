@@ -1,6 +1,8 @@
 package eu.veldsoft.vitdiscomp;
 
 /**
+ * Numeric constants for neurons type.
+ *
  * @author Todor Balabanov
  */
 enum NeuronType {

@@ -58,6 +58,16 @@ enum TimePeriod {
 	MN1(43200, "MN1");
 
 	/**
+	 * Time period as number of minutes.
+	 */
+	private int minutes;
+
+	/**
+	 * Time period as text description.
+	 */
+	private String name;
+
+	/**
 	 * Factory function for object reference from time interval.
 	 *
 	 * @param minutes Time interval in minutes.
@@ -94,16 +104,6 @@ enum TimePeriod {
 
 		return NONE;
 	}
-
-	/**
-	 * Time period as number of minutes.
-	 */
-	private int minutes;
-
-	/**
-	 * Time period as text description.
-	 */
-	private String name;
 
 	/**
 	 * Constructor with all parameters.

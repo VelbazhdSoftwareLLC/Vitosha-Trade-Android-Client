@@ -574,7 +574,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static final int GAP_BETWEEN_PANELS = 10;
 
 	/**
-	 * Defaul training time delay.
+	 * Default training time delay.
 	 */
 	private static final long DEFAULT_DELAY = 86400000L;
 
