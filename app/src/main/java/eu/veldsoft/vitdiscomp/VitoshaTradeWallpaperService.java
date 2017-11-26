@@ -201,21 +201,25 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			int height = panels[1].bottom - panels[1].top;
 
 			/*
-			 * Output layer activation function is used because input layer has no activation function.
+			 * Output layer activation function is used because input layer
+			 * has no activation function.
 			 */
 			double range[] = findLowAndHigh(network.getActivation(2));
 
 			/*
 			 * Total number of values to be visualized.
 			 */
-			int numberOfValues = network.getLayerNeuronCount(0) + network.getLayerNeuronCount(2);
+			int numberOfValues = network.getLayerNeuronCount(0) +
+					  network.getLayerNeuronCount(2);
 
 			/*
 			 * Visualize past data.
 			 */
 			paint.setColor(CHART_COLORS[0]);
-			for (int i = 0; forecast.getData() != null && i < forecast.getData().length; i++) {
-				int offset = (int) (height * (forecast.getData()[i] - range[0]) / (range[1] - range[0]));
+			for (int i = 0; forecast.getData() != null &&
+					  i < forecast.getData().length; i++) {
+				int offset = (int) (height * (forecast.getData()[i] - range[0]) /
+						  (range[1] - range[0]));
 				for (int dx = 0; dx < width / numberOfValues; dx++) {
 					canvas.drawLine(x, y, x, y - offset, paint);
 					x++;
@@ -226,8 +230,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 * Visualize future data.
 			 */
 			paint.setColor(CHART_COLORS[1]);
-			for (int i = 0; output.getData() != null && i < output.getData().length; i++) {
-				int offset = (int) (height * (output.getData()[i] - range[0]) / (range[1] - range[0]));
+			for (int i = 0; output.getData() != null &&
+					  i < output.getData().length; i++) {
+				int offset = (int) (height * (output.getData()[i] - range[0]) /
+						  (range[1] - range[0]));
 				for (int dx = 0; dx < width / numberOfValues; dx++) {
 					canvas.drawLine(x, y, x, y - offset, paint);
 					x++;
@@ -245,16 +251,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 * Artificial neural network.
 			 */
 			double topology[][] = {
-					  forecast.getData(),
-					  new double[network.getLayerNeuronCount(0) * network.getLayerNeuronCount(1)],
-					  new double[network.getLayerNeuronCount(1)],
-					  new double[network.getLayerNeuronCount(1) * network.getLayerNeuronCount(2)],
-					  output.getData()
+				forecast.getData(),
+				new double[network.getLayerNeuronCount(0) *
+						 network.getLayerNeuronCount(1)],
+				new double[network.getLayerNeuronCount(1)],
+				new double[network.getLayerNeuronCount(1) *
+						 network.getLayerNeuronCount(2)],
+				output.getData()
 			};
 
 			/*
-			 * At the first index is the low value. At the second index is the high
-			 * value.
+			 * At the first index is the low value. At the second index is
+			 * the high value.
 			 *
 			 * There is a problem with this approach, because some activation
 			 * functions are zero if the argument is infinity.
@@ -267,14 +275,16 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 * Scale input layer data.
 			 */
 			for (int i = 0; i < topology[0].length; i++) {
-				topology[0][i] = (topology[0][i] - range[0]) / (range[1] - range[0]);
+				topology[0][i] = (topology[0][i] - range[0]) /
+						  (range[1] - range[0]);
 			}
 
 			/*
 			 * Scale output layer data.
 			 */
 			for (int i = 0; i < topology[4].length; i++) {
-				topology[4][i] = (topology[4][i] - range[0]) / (range[1] - range[0]);
+				topology[4][i] = (topology[4][i] - range[0]) /
+						  (range[1] - range[0]);
 			}
 
 			for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
@@ -302,15 +312,17 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 
 			/*
-			 * Hidden layer values. Activation function of the second layer is used for scaling.
+			 * Hidden layer values. Activation function of the second layer
+			 * is used for scaling.
 			 */
 			range = findLowAndHigh(network.getActivation(1));
 			for (int i = 0; i < topology[2].length; i++) {
-				topology[2][i] = (network.getLayerOutput(1, i) - range[0]) / (range[1] - range[0]);
+				topology[2][i] = (network.getLayerOutput(1, i) - range[0]) /
+						  (range[1] - range[0]);
 			}
 
 			/*
-			 * Normalize weights.
+			 * Weights normalization.
 			 */
 			double min = Double.MAX_VALUE;
 			double max = Double.MIN_VALUE;
@@ -342,10 +354,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 */
 			int width = panels[2].right - panels[2].left;
 			int height = panels[2].bottom - panels[2].top;
-			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length; x += width / ANN_COLORS.length, k++) {
+			for (int x = panels[2].left, k = 0; k < ANN_COLORS.length;
+				  x += width / ANN_COLORS.length, k++) {
 				for (int dx = 0; dx < width / ANN_COLORS.length; dx++) {
-					for (int y = panels[2].top, l = 0; y < panels[2].bottom
-							  && l < topology[k].length; y += height / topology[k].length, l++) {
+					for (int y = panels[2].top, l = 0; y < panels[2].bottom &&
+							  l < topology[k].length; y += height / topology[k].length, l++) {
 						for (int dy = 0; dy < height / topology[k].length; dy++) {
 							paint.setColor(ANN_COLORS[k]);
 							paint.setColor(Color.argb(Color.alpha(ANN_COLORS[k]),
@@ -364,7 +377,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 */
 		public WallpaperEngine() {
 			super();
-
 			handler.post(trainer);
 		}
 
