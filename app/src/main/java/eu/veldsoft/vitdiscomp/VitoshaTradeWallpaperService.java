@@ -411,16 +411,19 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		public void onSurfaceChanged(SurfaceHolder holder,
+											  int format, int width, int height) {
 			super.onSurfaceChanged(holder, format, width, height);
 
 			screenWidth = width;
 			screenHeight = height;
 
 			SharedPreferences preferences = PreferenceManager
-					  .getDefaultSharedPreferences(VitoshaTradeWallpaperService.this);
+					  .getDefaultSharedPreferences(
+					  		  VitoshaTradeWallpaperService.this);
 
-			int panelsSideSize = Integer.parseInt(preferences.getString("sizing", "100"));
+			int panelsSideSize = Integer.parseInt(
+					  preferences.getString("sizing", "100"));
 
 			switch (preferences.getString("positioning", "0 0")) {
 				case "lt":
@@ -473,9 +476,11 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					break;
 				case "lc":
 					panels[0].left = GAP_BETWEEN_PANELS;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].top = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS - panelsSideSize;
 					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS;
 
 					panels[1].left = GAP_BETWEEN_PANELS;
 					panels[1].top = height / 2 - panelsSideSize / 2;
@@ -483,15 +488,19 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 					panels[2].left = GAP_BETWEEN_PANELS;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].top = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS;
 					panels[2].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS + panelsSideSize;
 					break;
 				case "cc":
 					panels[0].left = width / 2 - panelsSideSize / 2;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].top = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS - panelsSideSize;
 					panels[0].right = width / 2 + panelsSideSize / 2;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS;
 
 					panels[1].left = width / 2 - panelsSideSize / 2;
 					panels[1].top = height / 2 - panelsSideSize / 2;
@@ -499,15 +508,19 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 					panels[2].left = width / 2 - panelsSideSize / 2;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].top = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS;
 					panels[2].right = width / 2 + panelsSideSize / 2;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS + panelsSideSize;
 					break;
 				case "rc":
 					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[0].top = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[0].top = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS - panelsSideSize;
 					panels[0].right = width - GAP_BETWEEN_PANELS;
-					panels[0].bottom = height / 2 - panelsSideSize / 2 - GAP_BETWEEN_PANELS;
+					panels[0].bottom = height / 2 - panelsSideSize / 2 -
+							  GAP_BETWEEN_PANELS;
 
 					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
 					panels[1].top = height / 2 - panelsSideSize / 2;
@@ -515,20 +528,26 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					panels[1].bottom = height / 2 + panelsSideSize / 2;
 
 					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[2].top = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS;
+					panels[2].top = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS;
 					panels[2].right = width - GAP_BETWEEN_PANELS;
-					panels[2].bottom = height / 2 + panelsSideSize / 2 + GAP_BETWEEN_PANELS + panelsSideSize;
+					panels[2].bottom = height / 2 + panelsSideSize / 2 +
+							  GAP_BETWEEN_PANELS + panelsSideSize;
 					break;
 				case "lb":
 					panels[0].left = GAP_BETWEEN_PANELS;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 *
+							  panelsSideSize;
 					panels[0].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 
 					panels[1].left = GAP_BETWEEN_PANELS;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 					panels[1].right = GAP_BETWEEN_PANELS + panelsSideSize;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS -
+							  panelsSideSize;
 
 					panels[2].left = GAP_BETWEEN_PANELS;
 					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -537,14 +556,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					break;
 				case "cb":
 					panels[0].left = width / 2 - panelsSideSize / 2;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 *
+							  panelsSideSize;
 					panels[0].right = width / 2 + panelsSideSize / 2;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 
 					panels[1].left = width / 2 - panelsSideSize / 2;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 					panels[1].right = width / 2 + panelsSideSize / 2;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS -
+							  panelsSideSize;
 
 					panels[2].left = width / 2 - panelsSideSize / 2;
 					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -553,14 +576,18 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					break;
 				case "rb":
 					panels[0].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 * panelsSideSize;
+					panels[0].top = height - 3 * GAP_BETWEEN_PANELS - 3 *
+							  panelsSideSize;
 					panels[0].right = width - GAP_BETWEEN_PANELS;
-					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[0].bottom = height - 3 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 
 					panels[1].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
-					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 * panelsSideSize;
+					panels[1].top = height - 2 * GAP_BETWEEN_PANELS - 2 *
+							  panelsSideSize;
 					panels[1].right = width - GAP_BETWEEN_PANELS;
-					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS - panelsSideSize;
+					panels[1].bottom = height - 2 * GAP_BETWEEN_PANELS -
+							  panelsSideSize;
 
 					panels[2].left = width - panelsSideSize - GAP_BETWEEN_PANELS;
 					panels[2].top = height - GAP_BETWEEN_PANELS - panelsSideSize;
@@ -571,7 +598,8 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 					break;
 			}
 
-			delay = Long.parseLong(preferences.getString("loading", "" + DEFAULT_DELAY));
+			delay = Long.parseLong(preferences.getString("loading",
+					  "" + DEFAULT_DELAY));
 		}
 	}
 
