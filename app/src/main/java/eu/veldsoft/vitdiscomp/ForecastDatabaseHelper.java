@@ -55,33 +55,47 @@ class ForecastDatabaseHelper extends SQLiteOpenHelper {
 	/**
 	 * Create rates table SQL patter.
 	 */
-	private static final String SQL_CREATE_RATES = "CREATE TABLE " + RatesColumns.TABLE_NAME + " (" + RatesColumns._ID
-			  + " INTEGER NOT NULL," + RatesColumns.COLUMN_NAME_SYMBOL + " TEXT, " + RatesColumns.COLUMN_NAME_PERIOD
-			  + " INTEGER, " + RatesColumns.COLUMN_NAME_TIME + " TEXT, " + RatesColumns.COLUMN_NAME_OPEN + " TEXT, "
-			  + RatesColumns.COLUMN_NAME_LOW + " TEXT, " + RatesColumns.COLUMN_NAME_HIGH + " TEXT, "
-			  + RatesColumns.COLUMN_NAME_CLOSE + " TEXT, " + RatesColumns.COLUMN_NAME_VOLUME + " TEXT PRIMARY KEY ("
-			  + RatesColumns.COLUMN_NAME_SYMBOL + ", " + RatesColumns.COLUMN_NAME_PERIOD + "))";
+	private static final String SQL_CREATE_RATES = "CREATE TABLE "
+			  + RatesColumns.TABLE_NAME + " (" + RatesColumns._ID
+			  + " INTEGER NOT NULL," + RatesColumns.COLUMN_NAME_SYMBOL
+			  + " TEXT, " + RatesColumns.COLUMN_NAME_PERIOD
+			  + " INTEGER, " + RatesColumns.COLUMN_NAME_TIME + " TEXT, "
+			  + RatesColumns.COLUMN_NAME_OPEN + " TEXT, "
+			  + RatesColumns.COLUMN_NAME_LOW + " TEXT, "
+			  + RatesColumns.COLUMN_NAME_HIGH + " TEXT, "
+			  + RatesColumns.COLUMN_NAME_CLOSE + " TEXT, "
+			  + RatesColumns.COLUMN_NAME_VOLUME + " TEXT PRIMARY KEY ("
+			  + RatesColumns.COLUMN_NAME_SYMBOL + ", "
+			  + RatesColumns.COLUMN_NAME_PERIOD + "))";
 
 	/**
 	 * Create ANNs table SQL patter.
 	 */
-	private static final String SQL_CREATE_ANNS = "CREATE TABLE " + ANNsColumns.TABLE_NAME + " (" + ANNsColumns._ID
-			  + " INTEGER PRIMARY KEY," + ANNsColumns.COLUMN_NAME_SYMBOL + " TEXT, " + ANNsColumns.COLUMN_NAME_PERIOD
-			  + " INTEGER, " + ANNsColumns.COLUMN_NAME_NEURONS + " TEXT, " + ANNsColumns.COLUMN_NAME_ACTIVITIES
-			  + " TEXT, " + ANNsColumns.COLUMN_NAME_WEIGHTS + " TEXT, FOREIGN KEY (" + ANNsColumns.COLUMN_NAME_SYMBOL
-			  + ") REFERENCES " + RatesColumns.TABLE_NAME + "(" + RatesColumns.COLUMN_NAME_SYMBOL + "), FOREIGN KEY ("
-			  + ANNsColumns.COLUMN_NAME_PERIOD + ") REFERENCES " + RatesColumns.TABLE_NAME + "("
+	private static final String SQL_CREATE_ANNS = "CREATE TABLE "
+			  + ANNsColumns.TABLE_NAME + " (" + ANNsColumns._ID
+			  + " INTEGER PRIMARY KEY," + ANNsColumns.COLUMN_NAME_SYMBOL
+			  + " TEXT, " + ANNsColumns.COLUMN_NAME_PERIOD
+			  + " INTEGER, " + ANNsColumns.COLUMN_NAME_NEURONS + " TEXT, "
+			  + ANNsColumns.COLUMN_NAME_ACTIVITIES
+			  + " TEXT, " + ANNsColumns.COLUMN_NAME_WEIGHTS
+			  + " TEXT, FOREIGN KEY (" + ANNsColumns.COLUMN_NAME_SYMBOL
+			  + ") REFERENCES " + RatesColumns.TABLE_NAME
+			  + "(" + RatesColumns.COLUMN_NAME_SYMBOL + "), FOREIGN KEY ("
+			  + ANNsColumns.COLUMN_NAME_PERIOD + ") REFERENCES "
+			  + RatesColumns.TABLE_NAME + "("
 			  + RatesColumns.COLUMN_NAME_PERIOD + "))";
 
 	/**
 	 * Drop rates table SQL pattern.
 	 */
-	static final String SQL_DELETE_RATES = "DROP TABLE IF EXISTS " + RatesColumns.TABLE_NAME;
+	static final String SQL_DELETE_RATES = "DROP TABLE IF EXISTS "
+			  + RatesColumns.TABLE_NAME;
 
 	/**
 	 * Drop rates table SQL pattern.
 	 */
-	static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS " + ANNsColumns.TABLE_NAME;
+	static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS "
+			  + ANNsColumns.TABLE_NAME;
 
 	/**
 	 * Constructor.
