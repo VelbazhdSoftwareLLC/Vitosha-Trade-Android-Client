@@ -696,7 +696,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static MLDataSet examples = null;
 
 	/**
-	 * Forcasted data.
+	 * Forecasted data.
 	 */
 	private static MLData forecast = null;
 
