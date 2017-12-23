@@ -56,7 +56,7 @@ enum NeuronType {
 	 * Value factory function.
 	 *
 	 * @param type Numerical type representation.
-	 * @return Corresponding enumeration or regular if there is no corespondence.
+	 * @return Corresponding enumeration or regular if there is no correspondence.
 	 */
 	public static NeuronType valueOf(int type) {
 		for (NeuronType item : NeuronType.values()) {
