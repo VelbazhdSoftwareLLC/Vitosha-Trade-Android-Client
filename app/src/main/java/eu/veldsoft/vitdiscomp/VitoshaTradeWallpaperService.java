@@ -18,15 +18,25 @@ import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.ml.data.market.MarketDataDescription;
+import org.encog.ml.data.market.MarketDataType;
+import org.encog.ml.data.market.MarketMLDataSet;
+import org.encog.ml.data.market.TickerSymbol;
+import org.encog.ml.data.market.loader.LoadedMarketData;
+import org.encog.ml.data.market.loader.MarketLoader;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Background calculation unit.
@@ -34,6 +44,276 @@ import java.util.Random;
  * @author Todor Balabanov
  */
 public class VitoshaTradeWallpaperService extends WallpaperService {
+
+	/**
+	 * Pseudo-random number generator.
+	 */
+	private static final Random PRNG = new Random();
+	/**
+	 * Space between visual spots in pixels.
+	 */
+	private static final int GAP_BETWEEN_PANELS = 10;
+	/**
+	 * Default training time delay.
+	 */
+	private static final long DEFAULT_DELAY = 86400000L;
+	/**
+	 * Identifiers for the backgourd resources images to be used as background.
+	 */
+	private static final int IMAGES_IDS[] = {
+			  R.drawable.vitosha_mountain_dimitar_petarchev_001,
+			  R.drawable.vitosha_mountain_dimitar_petarchev_002,
+			  R.drawable.vitosha_mountain_dimitar_petarchev_003,
+			  R.drawable.vitosha_mountain_dimitar_petarchev_004,
+	};
+
+	//TODO Images should be loaded from a remote image server.
+	/**
+	 * Panel backgroud color in order to be a part transperent from the real background.
+	 */
+	private static final int PANEL_BACKGROUND_COLOR =
+			  Color.argb(63, 0, 0, 0);
+
+	// TODO Put all colors in the settings dialog.
+	/**
+	 * Text color to be used in panels.
+	 */
+	private static final int PANEL_TEXT_COLOR =
+			  Color.argb(95, 255, 255, 255);
+	/**
+	 * Colors used in the charts.
+	 */
+	private static final int CHART_COLORS[] = {
+			  Color.argb(95, 0, 255, 0),
+			  Color.argb(95, 255, 0, 0)};
+	/**
+	 * Colors used to visualize neural networks.
+	 */
+	private static final int ANN_COLORS[] = {
+			  Color.argb(95, 0, 255, 0),
+			  Color.argb(95, 255, 255, 255),
+			  Color.argb(95, 0, 0, 255),
+			  Color.argb(95, 255, 255, 255),
+			  Color.argb(95, 255, 0, 0)};
+	/**
+	 * Time delay between neural network trainings.
+	 */
+	private static long delay = 0;
+	/**
+	 * Visible surface width.
+	 */
+	private static int screenWidth = 0;
+	/**
+	 * Visible surface height.
+	 */
+	private static int screenHeight = 0;
+	/**
+	 * Wallpaper visibility flag.
+	 */
+	private static boolean visible = false;
+	/**
+	 * List of information panels rectangles information.
+	 */
+	private static Rect panels[] = {new Rect(), new Rect(), new Rect()};
+	/**
+	 * Neural network object.
+	 */
+	private static BasicNetwork network = new BasicNetwork();
+	/**
+	 * Training examples data set.
+	 */
+	private static MLDataSet examples = null;
+	/**
+	 * Forecasted data.
+	 */
+	private static MLData forecast = null;
+	/**
+	 * Calculated output data.
+	 */
+	private static MLData output = null;
+	/**
+	 * Training rule object.
+	 */
+	private static ResilientPropagation train = null;
+
+	/**
+	 * Initialize static class members.
+	 */
+	static {
+		// TODO Load ANN structure from the remote server.
+		Map<NeuronType, Integer> counters = new HashMap<NeuronType, Integer>();
+		counters.put(NeuronType.REGULAR, 0);
+		counters.put(NeuronType.BIAS, 0);
+		counters.put(NeuronType.INPUT, 0);
+		counters.put(NeuronType.OUTPUT, 0);
+
+		for (int type : InputData.NEURONS) {
+			counters.put(NeuronType.valueOf(type),
+					  counters.get(NeuronType.valueOf(type)) + 1);
+		}
+
+		int inputSize = counters.get(NeuronType.INPUT);
+		int hiddenSize = counters.get(NeuronType.REGULAR);
+		int outputSize = counters.get(NeuronType.OUTPUT);
+
+		/*
+		 * Network construction.
+		 */
+		network.addLayer(new BasicLayer(null,
+				  true, inputSize));
+		network.addLayer(new BasicLayer(new ActivationTANH(),
+				  true, hiddenSize));
+		network.addLayer(new BasicLayer(new ActivationTANH(),
+				  false, outputSize));
+		network.getStructure().finalizeStructure();
+		network.reset();
+
+		// TODO Load weights to the network.
+
+		double values[] = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
+
+		/*
+		 * Data construction.
+		 */
+		MarketMLDataSet data = new MarketMLDataSet(new MarketLoader() {
+			@Override
+			public Collection<LoadedMarketData> load(TickerSymbol symbol,
+																  Set<MarketDataType> types, Date start,
+																  Date end) {
+				Collection<LoadedMarketData> result = new
+						  ArrayList<LoadedMarketData>();
+
+				for (int i = 0; i < InputData.TIME.length; i++) {
+					/*
+					 * Data outside of the desired time frame are not loaded.
+					 */
+					if (InputData.TIME[i] < start.getTime() || end.getTime() < InputData.TIME[i]) {
+						continue;
+					}
+
+					LoadedMarketData value = new LoadedMarketData(new
+							  Date(InputData.TIME[i]), symbol);
+
+					value.setData(MarketDataType.CLOSE, InputData.CLOSE[i]);
+					value.setData(MarketDataType.HIGH, InputData.HIGH[i]);
+					value.setData(MarketDataType.LOW, InputData.LOW[i]);
+					value.setData(MarketDataType.OPEN, InputData.OPEN[i]);
+					value.setData(MarketDataType.VOLUME, InputData.VOLUME[i]);
+					value.setData(MarketDataType.ADJUSTED_CLOSE, InputData.CLOSE[i]);
+
+					result.add(value);
+				}
+
+				return result;
+			}
+		}, inputSize, outputSize);
+
+		MarketDataDescription description = new MarketDataDescription(new
+				  TickerSymbol(InputData.SYMBOL),
+				  (new MarketDataType[]{MarketDataType.CLOSE, MarketDataType.HIGH,
+							 MarketDataType.LOW,
+							 MarketDataType.OPEN})[(int) (Math.random() * 4)],
+				  true, true);
+		data.addDescription(description);
+		data.load(new Date(InputData.TIME[0]), new
+				  Date(InputData.TIME[InputData.TIME.length - 1]));
+		data.generate();
+
+		/*
+		 * Normalize data.
+		 */
+		double min = values[0];
+		double max = values[0];
+		for (double value : values) {
+			if (value < min) {
+				min = value;
+			}
+			if (value > max) {
+				max = value;
+			}
+		}
+
+		/*
+		 * At the first index is the low value. At the second index is the high
+		 * value.
+		 *
+		 * There is a problem with this approach, because some activation
+		 * functions are zero if the argument is infinity.
+		 *
+		 * The fist layer has no activation function.
+		 */
+		double range[] = findLowAndHigh(network.getActivation(2));
+
+		/*
+		 * Prepare training set.
+		 */
+		double input[][] = new double[values.length -
+				  (inputSize + outputSize)][inputSize];
+		double target[][] = new double[values.length -
+				  (inputSize + outputSize)][outputSize];
+		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
+			for (int j = 0; j < inputSize; j++) {
+				input[i][j] = range[0] + (range[1] - range[0]) *
+						  (values[i + j] - min) / (max - min);
+			}
+			for (int j = 0; j < outputSize; j++) {
+				target[i][j] = range[0] + (range[1] - range[0]) *
+						  (values[i + inputSize + j] - min) / (max - min);
+			}
+		}
+		examples = new BasicMLDataSet(input, target);
+
+		/*
+		 * Prepare forecast set.
+		 */
+		input = new double[1][inputSize];
+		for (int j = 0; j < inputSize; j++) {
+			input[0][j] = range[0] + (range[1] - range[0]) *
+					  (values[values.length - inputSize + j] - min) / (max - min);
+		}
+		forecast = new BasicMLData(input[0]);
+	}
+
+	/**
+	 * Lowest and highest values of partucular activation function. It is used for time series scaling.
+	 *
+	 * @param activation Activation function object.
+	 * @return Array with two values - loeset in the first index and highest in the second index.
+	 */
+	private static double[] findLowAndHigh(ActivationFunction activation) {
+		/*
+		 * Use range of double values.
+		 */
+		double check[] = {
+				  Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
+				  -0.001, -0.01, -0.1, -1, -10, -100, -1000,
+				  -10000, -100000, -1000000, 0, 0.000001, 0.00001,
+				  0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
+				  100000, 1000000, Double.MAX_VALUE};
+
+		/*
+		 * Map the range of double values to activation function output.
+		 */
+		activation.activationFunction(check, 0, check.length);
+
+		/*
+		 * Soft the result of the activation fuction output.
+		 */
+		Arrays.sort(check);
+
+		/*
+		 * Return minimum and maximum values of the activation function output.
+		 */
+		return new double[]{check[0], check[check.length - 1]};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Engine onCreateEngine() {
+		return new WallpaperEngine();
+	}
 
 	/**
 	 * Wallpaper engine class.
@@ -63,6 +343,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 				train();
 			}
 		};
+
+		/**
+		 * Constructor without parameters.
+		 */
+		public WallpaperEngine() {
+			super();
+			handler.post(trainer);
+		}
 
 		/**
 		 * Neural network prediction getter.
@@ -251,13 +539,13 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			 * Artificial neural network.
 			 */
 			double topology[][] = {
-				forecast.getData(),
-				new double[network.getLayerNeuronCount(0) *
-						 network.getLayerNeuronCount(1)],
-				new double[network.getLayerNeuronCount(1)],
-				new double[network.getLayerNeuronCount(1) *
-						 network.getLayerNeuronCount(2)],
-				output.getData()
+					  forecast.getData(),
+					  new double[network.getLayerNeuronCount(0) *
+								 network.getLayerNeuronCount(1)],
+					  new double[network.getLayerNeuronCount(1)],
+					  new double[network.getLayerNeuronCount(1) *
+								 network.getLayerNeuronCount(2)],
+					  output.getData()
 			};
 
 			/*
@@ -373,14 +661,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		}
 
 		/**
-		 * Constructor without parameters.
-		 */
-		public WallpaperEngine() {
-			super();
-			handler.post(trainer);
-		}
-
-		/**
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -420,7 +700,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 			SharedPreferences preferences = PreferenceManager
 					  .getDefaultSharedPreferences(
-					  		  VitoshaTradeWallpaperService.this);
+								 VitoshaTradeWallpaperService.this);
 
 			int panelsSideSize = Integer.parseInt(
 					  preferences.getString("sizing", "100"));
@@ -601,314 +881,5 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			delay = Long.parseLong(preferences.getString("loading",
 					  "" + DEFAULT_DELAY));
 		}
-	}
-
-	/**
-	 * Pseudo-random number generator.
-	 */
-	private static final Random PRNG = new Random();
-
-	/**
-	 * Space between visual spots in pixels.
-	 */
-	private static final int GAP_BETWEEN_PANELS = 10;
-
-	/**
-	 * Default training time delay.
-	 */
-	private static final long DEFAULT_DELAY = 86400000L;
-
-	//TODO Images should be loaded from a remote image server.
-	/**
-	 * Identifiers for the backgourd resources images to be used as background.
-	 */
-	private static final int IMAGES_IDS[] = {
-			  R.drawable.vitosha_mountain_dimitar_petarchev_001,
-			  R.drawable.vitosha_mountain_dimitar_petarchev_002,
-			  R.drawable.vitosha_mountain_dimitar_petarchev_003,
-			  R.drawable.vitosha_mountain_dimitar_petarchev_004,
-	};
-
-	// TODO Put all colors in the settings dialog.
-
-	/**
-	 * Panel backgroud color in order to be a part transperent from the real background.
-	 */
-	private static final int PANEL_BACKGROUND_COLOR =
-			  Color.argb(63, 0, 0, 0);
-
-	/**
-	 * Text color to be used in panels.
-	 */
-	private static final int PANEL_TEXT_COLOR =
-			  Color.argb(95, 255, 255, 255);
-
-	/**
-	 * Colors used in the charts.
-	 */
-	private static final int CHART_COLORS[] = {
-			  Color.argb(95, 0, 255, 0),
-			  Color.argb(95, 255, 0, 0)};
-
-	/**
-	 * Colors used to visualize neural networks.
-	 */
-	private static final int ANN_COLORS[] = {
-			  Color.argb(95, 0, 255, 0),
-			  Color.argb(95, 255, 255, 255),
-			  Color.argb(95, 0, 0, 255),
-			  Color.argb(95, 255, 255, 255),
-			  Color.argb(95, 255, 0, 0)};
-
-	/**
-	 * Time delay between neural network trainings.
-	 */
-	private static long delay = 0;
-
-	/**
-	 * Visible surface width.
-	 */
-	private static int screenWidth = 0;
-
-	/**
-	 * Visible surface height.
-	 */
-	private static int screenHeight = 0;
-
-	/**
-	 * Wallpaper visibility flag.
-	 */
-	private static boolean visible = false;
-
-	/**
-	 * List of information panels rectangles information.
-	 */
-	private static Rect panels[] = {new Rect(), new Rect(), new Rect()};
-
-	/**
-	 * Neural network object.
-	 */
-	private static BasicNetwork network = new BasicNetwork();
-
-	/**
-	 * Training examples data set.
-	 */
-	private static MLDataSet examples = null;
-
-	/**
-	 * Forecasted data.
-	 */
-	private static MLData forecast = null;
-
-	/**
-	 * Calculated output data.
-	 */
-	private static MLData output = null;
-
-	/**
-	 * Training rule object.
-	 */
-	private static ResilientPropagation train = null;
-
-	/**
-	 * Initialize static class members.
-	 */
-	static {
-		// TODO Load ANN structure from the remote server.
-		Map<NeuronType, Integer> counters = new HashMap<NeuronType, Integer>();
-		counters.put(NeuronType.REGULAR, 0);
-		counters.put(NeuronType.BIAS, 0);
-		counters.put(NeuronType.INPUT, 0);
-		counters.put(NeuronType.OUTPUT, 0);
-
-		for (int type : InputData.NEURONS) {
-			counters.put(NeuronType.valueOf(type),
-					  counters.get(NeuronType.valueOf(type)) + 1);
-		}
-
-		int inputSize = counters.get(NeuronType.INPUT);
-		int hiddenSize = counters.get(NeuronType.REGULAR);
-		int outputSize = counters.get(NeuronType.OUTPUT);
-
-		/*
-		 * Network construction.
-		 */
-		network.addLayer(new BasicLayer(null,
-				  true, inputSize));
-		network.addLayer(new BasicLayer(new ActivationTANH(),
-				  true, hiddenSize));
-		network.addLayer(new BasicLayer(new ActivationTANH(),
-				  false, outputSize));
-		network.getStructure().finalizeStructure();
-		network.reset();
-
-		// TODO Load weights to the network.
-
-		double values[] = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
-
-		// TODO Use DataNormalization class provided by Encog.
-
-		// InputField in;
-		// double normalized[] = new double[values.length];
-		// DataNormalization norm = new DataNormalization();
-		// norm.setReport(new NullStatusReportable());
-		// norm.addInputField(in = new InputFieldArray1D(true, values));
-		// norm.addOutputField(new OutputFieldRangeMapped(in, LOW, HIGH));
-		// norm.setTarget(new NormalizationStorageArray1D(normalized));
-		// norm.process();
-
-		// TODO Use TemporalMLDataSet class for time series data set which
-		// is provided by Encog.
-
-		// TemporalMLDataSet data = new TemporalMLDataSet(inputSize,
-		// outputSize);
-		// TemporalDataDescription description = new
-		// TemporalDataDescription(TemporalDataDescription.Type.RAW, true,
-		// true);
-		// data.addDescription(description);
-		// for (int index = inputSize; index < normalized.length - outputSize;
-		// index++) {
-		// TemporalPoint point = new TemporalPoint(1);
-		// point.setSequence(index);
-		// point.setData(0, normalized[index]);
-		// data.getPoints().add(point);
-		// }
-		// data.generate();
-
-		// TODO Use MarketDataDescription class for time series data set which
-		// is provided by Encog.
-
-		// MarketMLDataSet data = new MarketMLDataSet(new MarketLoader() {
-		// @Override
-		// public Collection<LoadedMarketData> load(TickerSymbol symbol,
-		// Set<MarketDataType> types, Date start,
-		// Date end) {
-		// Collection<LoadedMarketData> result = new
-		// ArrayList<LoadedMarketData>();
-		//
-		// for (int i = 0; i < InputData.TIME.length; i++) {
-		// if (start.getTime() <= InputData.TIME[i] && InputData.TIME[i] <=
-		// end.getTime()) {
-		// LoadedMarketData value = new LoadedMarketData(new
-		// Date(InputData.TIME[i]), symbol);
-		// value.setData(MarketDataType.CLOSE, InputData.CLOSE[i]);
-		// value.setData(MarketDataType.HIGH, InputData.HIGH[i]);
-		// value.setData(MarketDataType.LOW, InputData.LOW[i]);
-		// value.setData(MarketDataType.OPEN, InputData.OPEN[i]);
-		// value.setData(MarketDataType.VOLUME, InputData.VOLUME[i]);
-		// value.setData(MarketDataType.ADJUSTED_CLOSE, InputData.CLOSE[i]);
-		// result.add(value);
-		// }
-		// }
-		//
-		// return result;
-		// }
-		// }, inputSize, outputSize);
-		//
-		// MarketDataDescription description = new MarketDataDescription(new
-		// TickerSymbol(InputData.SYMBOL),
-		// (new MarketDataType[] { MarketDataType.CLOSE, MarketDataType.HIGH,
-		// MarketDataType.LOW,
-		// MarketDataType.OPEN })[(int) (Math.random() * 4)],
-		// true, true);
-		// data.addDescription(description);
-		// data.load(new Date(InputData.TIME[0]), new
-		// Date(InputData.TIME[InputData.TIME.length - 1]));
-		// data.generate();
-
-		/*
-		 * Normalize data.
-		 */
-		double min = values[0];
-		double max = values[0];
-		for (double value : values) {
-			if (value < min) {
-				min = value;
-			}
-			if (value > max) {
-				max = value;
-			}
-		}
-
-		/*
-		 * At the first index is the low value. At the second index is the high
-		 * value.
-		 *
-		 * There is a problem with this approach, because some activation
-		 * functions are zero if the argument is infinity.
-		 *
-		 * The fist layer has no activation function.
-		 */
-		double range[] = findLowAndHigh(network.getActivation(2));
-
-		/*
-       * Prepare training set.
-		 */
-		double input[][] = new double[values.length -
-				  (inputSize + outputSize)][inputSize];
-		double target[][] = new double[values.length -
-				  (inputSize + outputSize)][outputSize];
-		for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
-			for (int j = 0; j < inputSize; j++) {
-				input[i][j] = range[0] + (range[1] - range[0]) *
-						  (values[i + j] - min) / (max - min);
-			}
-			for (int j = 0; j < outputSize; j++) {
-				target[i][j] = range[0] + (range[1] - range[0]) *
-						  (values[i + inputSize + j] - min) / (max - min);
-			}
-		}
-		examples = new BasicMLDataSet(input, target);
-
-		/*
-		 * Prepare forecast set.
-		 */
-		input = new double[1][inputSize];
-		for (int j = 0; j < inputSize; j++) {
-			input[0][j] = range[0] + (range[1] - range[0]) *
-					  (values[values.length - inputSize + j] - min) / (max - min);
-		}
-		forecast = new BasicMLData(input[0]);
-	}
-
-	/**
-	 * Lowest and highest values of partucular activation function. It is used for time series scaling.
-	 *
-	 * @param activation Activation function object.
-	 * @return Array with two values - loeset in the first index and highest in the second index.
-	 */
-	private static double[] findLowAndHigh(ActivationFunction activation) {
-		/*
-		 * Use range of double values.
-		 */
-		double check[] = {
-				  Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
-				  -0.001, -0.01, -0.1, -1, -10, -100, -1000,
-				  -10000, -100000, -1000000, 0, 0.000001, 0.00001,
-				  0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
-				  100000, 1000000, Double.MAX_VALUE};
-
-		/*
-		 * Map the range of double values to activation function output.
-		 */
-		activation.activationFunction(check, 0, check.length);
-
-		/*
-		 * Soft the result of the activation fuction output.
-		 */
-		Arrays.sort(check);
-
-		/*
-		 * Return minimum and maximum values of the activation function output.
-		 */
-		return new double[]{check[0], check[check.length - 1]};
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Engine onCreateEngine() {
-		return new WallpaperEngine();
 	}
 }
