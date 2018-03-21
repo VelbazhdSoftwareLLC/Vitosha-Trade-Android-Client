@@ -9,6 +9,7 @@
     <string name="set_wallpaper_label">Set Wallpaper</string>
     <string name="loading_title">Device Computation Loading</string>
     <string name="set_wallpaper_title">Set Wallpaper</string>
+    <string name="server_url_title">Remote Server URL</string>
     <string name="positioning_title">Panels Position</string>
     <string name="panels_title">Panels Size</string>
     <string name="close_title">CLOSE</string>
