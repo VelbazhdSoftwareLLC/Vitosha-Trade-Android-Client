@@ -49,14 +49,17 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 * Pseudo-random number generator.
 	 */
 	private static final Random PRNG = new Random();
+
 	/**
 	 * Space between visual spots in pixels.
 	 */
 	private static final int GAP_BETWEEN_PANELS = 10;
+
 	/**
 	 * Default training time delay.
 	 */
 	private static final long DEFAULT_DELAY = 86400000L;
+
 	/**
 	 * Identifiers for the backgourd resources images to be used as background.
 	 */
@@ -80,12 +83,14 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	 */
 	private static final int PANEL_TEXT_COLOR =
 			  Color.argb(95, 255, 255, 255);
+
 	/**
 	 * Colors used in the charts.
 	 */
 	private static final int CHART_COLORS[] = {
 			  Color.argb(95, 0, 255, 0),
 			  Color.argb(95, 255, 0, 0)};
+
 	/**
 	 * Colors used to visualize neural networks.
 	 */
@@ -95,52 +100,73 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			  Color.argb(95, 0, 0, 255),
 			  Color.argb(95, 255, 255, 255),
 			  Color.argb(95, 255, 0, 0)};
+
 	/**
 	 * Time delay between neural network trainings.
 	 */
 	private static long delay = 0;
+
 	/**
 	 * Visible surface width.
 	 */
 	private static int screenWidth = 0;
+
 	/**
 	 * Visible surface height.
 	 */
 	private static int screenHeight = 0;
+
 	/**
 	 * Wallpaper visibility flag.
 	 */
 	private static boolean visible = false;
+
 	/**
 	 * List of information panels rectangles information.
 	 */
 	private static Rect panels[] = {new Rect(), new Rect(), new Rect()};
+
 	/**
 	 * Neural network object.
 	 */
 	private static BasicNetwork network = new BasicNetwork();
+
 	/**
 	 * Training examples data set.
 	 */
 	private static MLDataSet examples = null;
+
 	/**
-	 * Forecasted data.
+	 * Data of the forecast.
 	 */
 	private static MLData forecast = null;
+
 	/**
 	 * Calculated output data.
 	 */
 	private static MLData output = null;
+
 	/**
 	 * Training rule object.
 	 */
 	private static ResilientPropagation train = null;
 
 	/**
-	 * Initialize static class members.
+	 * Initialize common class members.
 	 */
-	static {
-		// TODO Load ANN structure from the remote server.
+	private void initialize() {
+		/*
+		 * Load ANN structure and time series data from the remote server.
+		 */
+		HttpHelper helper = new HttpHelper(PreferenceManager
+				  .getDefaultSharedPreferences(
+							 VitoshaTradeWallpaperService.this).
+							 getString("server_url", "localhost"));
+
+		if(helper.load() == false) {
+			// TODO Use local data if the remote server is not available.
+		}
+
 		Map<NeuronType, Integer> counters = new HashMap<NeuronType, Integer>();
 		counters.put(NeuronType.REGULAR, 0);
 		counters.put(NeuronType.BIAS, 0);
@@ -275,10 +301,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	}
 
 	/**
-	 * Lowest and highest values of partucular activation function. It is used for time series scaling.
+	 * Lowest and highest values of particular activation function. It is used for time series scaling.
 	 *
 	 * @param activation Activation function object.
-	 * @return Array with two values - loeset in the first index and highest in the second index.
+	 * @return Array with two values - lowest in the first index and highest in the second index.
 	 */
 	private static double[] findLowAndHigh(ActivationFunction activation) {
 		/*
@@ -305,6 +331,16 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 		 * Return minimum and maximum values of the activation function output.
 		 */
 		return new double[]{check[0], check[check.length - 1]};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void onCreate() {
+		super.onCreate();
+
+		initialize();
 	}
 
 	/**

@@ -30,4 +30,12 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
+    implementation files('libs/httpclient-cache-4.5.2.jar')
+    implementation files('libs/commons-codec-1.9.jar')
+    implementation files('libs/httpclient-win-4.5.2.jar')
+    implementation files('libs/httpclient-4.5.2.jar')
+    implementation files('libs/fluent-hc-4.5.2.jar')
+    implementation files('libs/httpcore-4.4.4.jar')
+    implementation files('libs/httpmime-4.5.2.jar')
+    implementation files('libs/commons-logging-1.2.jar')
 }

@@ -13,7 +13,7 @@
     <EditTextPreference
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:defaultValue="http://vitoshatrade.veldsoft.eu/"
+        android:defaultValue="vitoshatrade.veldsoft.eu"
         android:key="server_url"
         android:title="@string/server_url_title"/>
 
