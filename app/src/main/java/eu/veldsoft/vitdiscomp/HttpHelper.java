@@ -20,12 +20,12 @@ class HttpHelper {
 	/**
 	 * Load random ANN remote server script name.
 	 */
-	private final String LOAD_RANDOM_ANN_SCRIPT = "load_random_ann.pnp";
+	private final String LOAD_RANDOM_ANN_SCRIPT = "json_load_random_ann.pnp";
 
 	/**
 	 * Report retrained ANN remote server script name.
 	 */
-	private final String REPORT_RETRAINED_ANN_SCRIPT = "rport_retrained_ann.pnp";
+	private final String SAVE_RETRAINED_ANN_SCRIPT = "save_retrained_ann.pnp";
 
 	/**
 	 * Remote server URl address.
@@ -69,5 +69,11 @@ class HttpHelper {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Store calculated ANN weights on the remote web server.
+	 */
+	public void store() {
 	}
 }
