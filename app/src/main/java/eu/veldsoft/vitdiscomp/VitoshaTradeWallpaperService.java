@@ -26,6 +26,7 @@ import org.encog.ml.data.market.loader.LoadedMarketData;
 import org.encog.ml.data.market.loader.MarketLoader;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	private static final long DEFAULT_DELAY = 86400000L;
 
 	/**
-	 * Identifiers for the backgourd resources images to be used as background.
+	 * Identifiers for the background resources images to be used as background.
 	 */
 	private static final int IMAGES_IDS[] = {
 			  R.drawable.vitosha_mountain_dimitar_petarchev_001,
@@ -72,7 +73,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
 	//TODO Images should be loaded from a remote image server.
 	/**
-	 * Panel backgroud color in order to be a part transperent from the real background.
+	 * Panel background color in order to be a part transparent from the real background.
 	 */
 	private static final int PANEL_BACKGROUND_COLOR =
 			  Color.argb(63, 0, 0, 0);
@@ -149,7 +150,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 	/**
 	 * Training rule object.
 	 */
-	private static ResilientPropagation train = null;
+	private static Propagation train = null;
 
 	/**
 	 * Initialize common class members.
