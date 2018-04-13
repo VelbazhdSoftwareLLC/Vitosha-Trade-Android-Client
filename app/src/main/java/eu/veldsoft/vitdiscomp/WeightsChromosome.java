@@ -31,9 +31,11 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 * @param representation Values as array.
 	 * @param network        Neural network reference.
 	 * @param train          Neural network training strategy.
-	 * @throws InvalidRepresentationException Rise an exception if the values are not valid.
+	 * @throws InvalidRepresentationException Rise an exception if the values
+	 * are not valid.
 	 */
-	public WeightsChromosome(Double[] representation, BasicNetwork network, Train train)
+	public WeightsChromosome(Double[] representation,
+									 BasicNetwork network, Train train)
 			  throws InvalidRepresentationException {
 		super(representation);
 		this.network = network;
@@ -54,9 +56,11 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 * @param representation Values as list.
 	 * @param network        Neural network reference.
 	 * @param train          Neural network training strategy.
-	 * @throws InvalidRepresentationException Rise an exception if the values are not valid.
+	 * @throws InvalidRepresentationException Rise an exception if the values
+	 * are not valid.
 	 */
-	public WeightsChromosome(List<Double> representation, BasicNetwork network, Train train)
+	public WeightsChromosome(List<Double> representation,
+									 BasicNetwork network, Train train)
 			  throws InvalidRepresentationException {
 		super(representation);
 		this.network = network;
@@ -79,7 +83,8 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 * @param network        Neural network reference.
 	 * @param train          Neural network training strategy.
 	 */
-	public WeightsChromosome(List<Double> representation, boolean copy, BasicNetwork network, Train train) {
+	public WeightsChromosome(List<Double> representation, boolean copy,
+									 BasicNetwork network, Train train) {
 		super(representation, copy);
 		this.network = network;
 		this.train = train;
@@ -107,7 +112,7 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 		}
 
 		/*
-			* Load weights from the internal representation into the network
+		 * Load weights from the internal representation into the network
 		 * structure.
 		 */
 		List<Double> values = getRepresentation();
@@ -120,10 +125,13 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 		}
 
 		/*
-			* Iterate over the training set in order to calculate network error.
+		 * Iterate over the training set in order to calculate network error.
 		 */
 		train.iteration();
 
+		/*
+		 * Total ANN error is used as fitness value.
+		 */
 		return train.getError();
 	}
 
@@ -131,8 +139,9 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void checkValidity(List<Double> values) throws InvalidRepresentationException {
-        /*
+	protected void checkValidity(List<Double> values)
+			  throws InvalidRepresentationException {
+		/*
 		 * Length of the values should match the number of weights in the neural
 		 * network structure.
 		 */
@@ -154,7 +163,17 @@ class WeightsChromosome extends AbstractListChromosome<Double> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AbstractListChromosome<Double> newFixedLengthChromosome(List<Double> values) {
+	public AbstractListChromosome<Double> newFixedLengthChromosome(
+			  List<Double> values) {
 		return new WeightsChromosome(values, true, network, train);
+	}
+
+	/**
+	 * Chromosome representation getter.
+	 *
+	 * @return List with chromosome values.
+	 */
+	public List<Double> getRepresentation() {
+		return getRepresentation();
 	}
 }

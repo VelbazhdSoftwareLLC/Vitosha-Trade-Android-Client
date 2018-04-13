@@ -12,6 +12,13 @@ import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
+import org.apache.commons.math3.genetics.Chromosome;
+import org.apache.commons.math3.genetics.ElitisticListPopulation;
+import org.apache.commons.math3.genetics.FixedElapsedTime;
+import org.apache.commons.math3.genetics.GeneticAlgorithm;
+import org.apache.commons.math3.genetics.Population;
+import org.apache.commons.math3.genetics.TournamentSelection;
+import org.apache.commons.math3.genetics.UniformCrossover;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -35,6 +42,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -164,7 +173,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 							 VitoshaTradeWallpaperService.this).
 							 getString("server_url", "localhost"));
 
-		if(helper.load() == false) {
+		if (helper.load() == false) {
 			// TODO Use local data if the remote server is not available.
 		}
 
@@ -441,8 +450,76 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 			}
 
 			train = new ResilientPropagation(network, examples);
-			train.iteration();
-			train.finishTraining();
+
+			/*
+			 * Switch between backpropagation and genetic algorithm.
+			 */
+			if (PRNG.nextBoolean() == true) {
+				train.iteration();
+				train.finishTraining();
+			} else {
+				int populationSize = 4 + PRNG.nextInt(33);
+				double elitismRate = PRNG.nextInt(100) / 1000D;
+				double crossoverRate = PRNG.nextInt(900) / 1000D;
+				double mutationRate = PRNG.nextInt(10) / 1000D;
+				int tournamentArity = PRNG.nextBoolean() ? 1 : 2;
+				long optimizationTimeout = 1;
+
+				/*
+				 * Obtain ANN weights.
+				 */
+				List<Double> weights = new ArrayList<Double>();
+				for (int l = 1; l < network.getLayerCount(); l++) {
+					for (int m = 0; m < network.getLayerNeuronCount(l - 1); m++) {
+						for (int n = 0; n < network.getLayerNeuronCount(l); n++) {
+							weights.add(network.getWeight(l, m, n));
+						}
+					}
+				}
+
+				/*
+				 * Generate population.
+				 */
+				List<Chromosome> list = new LinkedList<Chromosome>();
+				for (int i = 0; i < populationSize; i++) {
+					list.add(new WeightsChromosome(weights, true, network, train));
+				}
+				Population initial = new ElitisticListPopulation(list,
+						  2 * list.size(), elitismRate);
+
+				/*
+				 * Initialize genetic algorithm.
+				 */
+				GeneticAlgorithm algorithm = new GeneticAlgorithm(
+						  new UniformCrossover<WeightsChromosome>(0.5),
+						  crossoverRate, new UniformBinaryMutation(),
+						  mutationRate, new TournamentSelection(tournamentArity));
+
+				/*
+				 * Run optimization.
+				 */
+				Population optimized = algorithm.evolve(initial,
+						  new FixedElapsedTime(optimizationTimeout));
+
+				/*
+				 * Obtain result.
+				 */
+				weights = ((WeightsChromosome)
+						  optimized.getFittestChromosome()).
+						  getRepresentation();
+
+				/*
+				 * Replace ANN weights.
+				 */
+				for (int l = 1, k = 0; l < network.getLayerCount(); l++) {
+					for (int m = 0; m < network.getLayerNeuronCount(l - 1); m++) {
+						for (int n = 0; n < network.getLayerNeuronCount(l); n++, k++) {
+							weights.add(network.getWeight(l, m, n));
+							network.setWeight(l, m, n, weights.get(k));
+						}
+					}
+				}
+			}
 		}
 
 		/**
