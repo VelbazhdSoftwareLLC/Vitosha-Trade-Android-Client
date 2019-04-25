@@ -3,9 +3,9 @@
 
     <string name="hello_world"></string>
     <string name="app_name">VitDisComp</string>
-    <string name="wallpaper_description">Vitosha Trade Wallpaper Distributed Computing Project</string>
-    <string name="vitosha_trade_wallpaper_label">Vitosha Trade Wallpaper</string>
-    <string name="title_activity_options">Vitosha Trade Wallpaper</string>
+    <string name="wallpaper_description">Vitosha Trade Distributed Computing Project</string>
+    <string name="vitosha_trade_wallpaper_label">Vitosha Trade Client</string>
+    <string name="title_activity_options">Vitosha Trade Client</string>
     <string name="set_wallpaper_label">Set Wallpaper</string>
     <string name="loading_title">Device Computation Loading</string>
     <string name="set_wallpaper_title">Set Wallpaper</string>
