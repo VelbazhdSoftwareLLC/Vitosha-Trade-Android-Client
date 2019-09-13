@@ -1,9 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.veldsoft.vitosha.trade">
-
-    <uses-feature
-        android:name="android.software.live_wallpaper"
-        android:required="true"/>
 
     <application
         android:allowBackup="false"
@@ -12,6 +9,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".VotingWidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".WallpaperConfigureActivity"
+            android:label="@string/title_activity_options"
+            android:launchMode="singleInstance"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name=".VotingWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/voting_widget_info" />
+        </receiver>
 
         <service
             android:name=".VitoshaTradeWallpaperService"
@@ -19,26 +45,17 @@
             android:label="@string/vitosha_trade_wallpaper_label"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService"/>
+                <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/vitosha_trade_wallpaper"/>
+                android:resource="@xml/vitosha_trade_wallpaper" />
         </service>
-
-        <activity
-            android:name=".OptionsActivity"
-            android:label="@string/title_activity_options"
-            android:launchMode="singleInstance"
-            android:noHistory="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
-
     </application>
+
+    <uses-feature
+        android:name="android.software.live_wallpaper"
+        android:required="true" />
 
 </manifest>

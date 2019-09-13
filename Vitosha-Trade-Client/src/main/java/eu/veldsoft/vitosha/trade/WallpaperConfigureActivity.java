@@ -13,7 +13,7 @@ import android.preference.PreferenceManager;
  *
  * @author Todor Balabanov
  */
-public class OptionsActivity extends PreferenceActivity {
+public class WallpaperConfigureActivity extends PreferenceActivity {
 
 	/**
 	 * {@inheritDoc}
@@ -21,7 +21,7 @@ public class OptionsActivity extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.layout.activity_options);
+		addPreferencesFromResource(R.layout.wallpaper_configure);
 	}
 
 	/**
@@ -31,16 +31,16 @@ public class OptionsActivity extends PreferenceActivity {
 	protected void onPause() {
 		super.onPause();
 		SharedPreferences preferences = PreferenceManager
-				  .getDefaultSharedPreferences(OptionsActivity.this);
+				  .getDefaultSharedPreferences(WallpaperConfigureActivity.this);
 
 		/*
 		 * Remove our wallpaper.
 		 */
 		if (preferences.getBoolean("set_wallpaper", false) == false) {
-			stopService(new Intent(OptionsActivity.this,
+			stopService(new Intent(WallpaperConfigureActivity.this,
 					  VitoshaTradeWallpaperService.class));
 			startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
-			OptionsActivity.this.finish();
+			WallpaperConfigureActivity.this.finish();
 
 			return;
 		}
@@ -50,9 +50,9 @@ public class OptionsActivity extends PreferenceActivity {
 		 */
 		Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
 		intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-				  new ComponentName(OptionsActivity.this,
+				  new ComponentName(WallpaperConfigureActivity.this,
 							 VitoshaTradeWallpaperService.class));
 		startActivity(intent);
-		OptionsActivity.this.finish();
+		WallpaperConfigureActivity.this.finish();
 	}
 }
