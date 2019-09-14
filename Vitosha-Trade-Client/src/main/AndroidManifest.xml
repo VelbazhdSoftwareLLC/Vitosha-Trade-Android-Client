@@ -36,7 +36,7 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/voting_widget_info" />
+                android:resource="@xml/widget_info" />
         </receiver>
 
         <service
@@ -50,7 +50,7 @@
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/vitosha_trade_wallpaper" />
+                android:resource="@xml/wallpaper_info" />
         </service>
     </application>
 

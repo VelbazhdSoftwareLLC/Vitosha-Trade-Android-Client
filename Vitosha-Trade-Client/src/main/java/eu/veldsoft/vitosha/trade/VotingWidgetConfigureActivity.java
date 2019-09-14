@@ -48,7 +48,7 @@ public class VotingWidgetConfigureActivity extends Activity {
         if (titleValue != null) {
             return titleValue;
         } else {
-            return context.getString(R.string.appwidget_text);
+            return "";
         }
     }
 
