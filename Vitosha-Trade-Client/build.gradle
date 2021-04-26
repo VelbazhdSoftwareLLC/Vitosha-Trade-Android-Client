@@ -29,4 +29,5 @@ dependencies {
     //implementation 'cz.msebera.android:httpclient:4.4.1.2'
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'org.mariuszgromada.math:MathParser.org-mXparser:4.0.0'
+    implementation group: 'org.moeaframework', name: 'moeaframework', version: '2.13'
 }
