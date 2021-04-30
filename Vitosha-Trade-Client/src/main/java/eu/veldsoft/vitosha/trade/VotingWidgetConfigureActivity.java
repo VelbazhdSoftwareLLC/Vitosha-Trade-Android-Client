@@ -12,9 +12,13 @@ import android.widget.EditText;
 public class VotingWidgetConfigureActivity extends Activity {
 
     private static final String PREFS_NAME = "eu.veldsoft.vitosha.trade.VotingWidget";
+
     private static final String PREF_PREFIX_KEY = "appwidget_";
+
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+
     EditText mAppWidgetText;
+
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = VotingWidgetConfigureActivity.this;

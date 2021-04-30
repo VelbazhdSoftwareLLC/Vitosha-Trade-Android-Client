@@ -27,8 +27,9 @@ dependencies {
 
     implementation group: 'org.encog', name: 'encog-core', version: '3.4'
 
-    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.14'
-    //implementation group: 'cz.msebera.android', name: 'httpclient', version: '4.5.8'
+    //implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.14'
+    implementation group: 'cz.msebera.android', name: 'httpclient', version: '4.5.8'
+    //implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
 
     implementation group: 'org.moeaframework', name: 'moeaframework', version: '2.13'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
