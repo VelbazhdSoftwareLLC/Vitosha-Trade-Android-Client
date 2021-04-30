@@ -1,11 +1,11 @@
-package eu.veldsoft.vitosha.trade;
+package eu.veldsoft.vitosha.trade.communication;
 
 /**
  * Time series fixed time periods.
  *
  * @author Todor Balabanov
  */
-enum TimePeriod {
+public enum TimePeriod {
 
 	/**
 	 * No time period at all.
@@ -74,7 +74,7 @@ enum TimePeriod {
 	 * @return Time period as object.
 	 * @throws RuntimeException Rise exception if there is no such time interval in minutes.
 	 */
-	static TimePeriod value(int minutes) throws RuntimeException {
+	public static TimePeriod value(int minutes) throws RuntimeException {
 		for (TimePeriod item : TimePeriod.values()) {
 			if (item.minutes == minutes) {
 				return item;
@@ -93,7 +93,7 @@ enum TimePeriod {
 	 * @return Time period as object.
 	 * @throws RuntimeException Rise exception if there is no such time interval in minutes.
 	 */
-	static TimePeriod value(String name) throws RuntimeException {
+	public static TimePeriod value(String name) throws RuntimeException {
 		for (TimePeriod item : TimePeriod.values()) {
 			if (name.equals(item.name) == true) {
 				return item;

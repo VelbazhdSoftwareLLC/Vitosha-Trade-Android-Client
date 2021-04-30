@@ -1,11 +1,11 @@
-package eu.veldsoft.vitosha.trade;
+package eu.veldsoft.vitosha.trade.communication;
 
 /**
  * Numeric constants for neurons type.
  *
  * @author Todor Balabanov
  */
-enum NeuronType {
+public enum NeuronType {
 
 	/**
 	 * Regular neuron flag.

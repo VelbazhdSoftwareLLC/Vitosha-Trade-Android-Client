@@ -1,11 +1,11 @@
-package eu.veldsoft.vitosha.trade;
+package eu.veldsoft.vitosha.trade.dummy;
 
 /**
  * It is used for system input global space.
  *
  * @author Todor Balabanov
  */
-class InputData {
+public class InputData {
 	// TODO Better object-oriented design should be used.
 	public static String SYMBOL = "SIN";
 	public static int PERIOD = 1;

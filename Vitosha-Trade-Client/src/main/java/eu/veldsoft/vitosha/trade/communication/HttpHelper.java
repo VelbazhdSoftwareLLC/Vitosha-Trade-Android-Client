@@ -1,4 +1,4 @@
-package eu.veldsoft.vitosha.trade;
+package eu.veldsoft.vitosha.trade.communication;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -18,12 +18,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.veldsoft.vitosha.trade.dummy.InputData;
+
 /**
  * It is used for HTTP communication with the remote server.
  *
  * @author Todor Balabanov
  */
-class HttpHelper {
+public class HttpHelper {
     /**
      * Load random ANN remote server script name.
      */

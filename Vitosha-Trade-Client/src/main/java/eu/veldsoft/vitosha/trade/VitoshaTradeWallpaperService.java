@@ -18,7 +18,9 @@ import org.apache.commons.math3.genetics.FixedElapsedTime;
 import org.apache.commons.math3.genetics.GeneticAlgorithm;
 import org.apache.commons.math3.genetics.Population;
 import org.apache.commons.math3.genetics.TournamentSelection;
+import org.apache.commons.math3.genetics.UniformBinaryMutation;
 import org.apache.commons.math3.genetics.UniformCrossover;
+import org.apache.commons.math3.genetics.WeightsChromosome;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -47,6 +49,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import eu.veldsoft.vitosha.trade.communication.HttpHelper;
+import eu.veldsoft.vitosha.trade.communication.NeuronType;
+import eu.veldsoft.vitosha.trade.communication.TimePeriod;
+import eu.veldsoft.vitosha.trade.dummy.InputData;
 
 /**
  * Background calculation unit.

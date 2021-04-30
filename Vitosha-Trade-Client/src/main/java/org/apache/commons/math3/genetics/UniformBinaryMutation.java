@@ -1,10 +1,11 @@
-package eu.veldsoft.vitosha.trade;
+package org.apache.commons.math3.genetics;
 
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.genetics.Chromosome;
 import org.apache.commons.math3.genetics.GeneticAlgorithm;
 import org.apache.commons.math3.genetics.MutationPolicy;
+import org.apache.commons.math3.genetics.WeightsChromosome;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
  *
  * @author Todor Balabanov
  */
-class UniformBinaryMutation implements MutationPolicy {
+public class UniformBinaryMutation implements MutationPolicy {
 
 	/**
 	 * Pseudo random number generator.

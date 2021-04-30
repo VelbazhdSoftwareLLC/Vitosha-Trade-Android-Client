@@ -1,7 +1,5 @@
-package eu.veldsoft.vitosha.trade;
+package org.apache.commons.math3.genetics;
 
-import org.apache.commons.math3.genetics.AbstractListChromosome;
-import org.apache.commons.math3.genetics.InvalidRepresentationException;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.training.Train;
 
@@ -13,7 +11,7 @@ import java.util.List;
  *
  * @author Todor Balabanov
  */
-class WeightsChromosome extends AbstractListChromosome<Double> {
+public class WeightsChromosome extends AbstractListChromosome<Double> {
 
 	/**
 	 * Reference to external neural network object.

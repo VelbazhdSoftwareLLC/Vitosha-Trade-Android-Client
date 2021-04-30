@@ -37,9 +37,9 @@ class ForecastDatabaseHelper extends SQLiteOpenHelper {
 		public static final String TABLE_NAME = "anns";
 		public static final String COLUMN_NAME_SYMBOL = "symbol";
 		public static final String COLUMN_NAME_PERIOD = "period";
-		public static final String COLUMN_NAME_NEURONS = "";
-		public static final String COLUMN_NAME_ACTIVITIES = "";
-		public static final String COLUMN_NAME_WEIGHTS = "";
+		public static final String COLUMN_NAME_NEURONS = "neurons";
+		public static final String COLUMN_NAME_ACTIVITIES = "activities";
+		public static final String COLUMN_NAME_WEIGHTS = "weights";
 	}
 
 	/**
