@@ -169,6 +169,39 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     private static Propagation train = null;
 
     /**
+     * Lowest and highest values of particular activation function. It is used for time series scaling.
+     *
+     * @param activation Activation function object.
+     * @return Array with two values - lowest in the first index and highest in the second index.
+     */
+    private static double[] findLowAndHigh(ActivationFunction activation) {
+        /*
+         * Use range of double values.
+         */
+        double check[] = {
+                Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
+                -0.001, -0.01, -0.1, -1, -10, -100, -1000,
+                -10000, -100000, -1000000, 0, 0.000001, 0.00001,
+                0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
+                100000, 1000000, Double.MAX_VALUE};
+
+        /*
+         * Map the range of double values to activation function output.
+         */
+        activation.activationFunction(check, 0, check.length);
+
+        /*
+         * Soft the result of the activation fuction output.
+         */
+        Arrays.sort(check);
+
+        /*
+         * Return minimum and maximum values of the activation function output.
+         */
+        return new double[]{check[0], check[check.length - 1]};
+    }
+
+    /**
      * Initialize common class members.
      */
     private void initialize() {
@@ -315,39 +348,6 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
                     (values[values.length - inputSize + j] - min) / (max - min);
         }
         forecast = new BasicMLData(input[0]);
-    }
-
-    /**
-     * Lowest and highest values of particular activation function. It is used for time series scaling.
-     *
-     * @param activation Activation function object.
-     * @return Array with two values - lowest in the first index and highest in the second index.
-     */
-    private static double[] findLowAndHigh(ActivationFunction activation) {
-        /*
-         * Use range of double values.
-         */
-        double check[] = {
-                Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
-                -0.001, -0.01, -0.1, -1, -10, -100, -1000,
-                -10000, -100000, -1000000, 0, 0.000001, 0.00001,
-                0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000,
-                100000, 1000000, Double.MAX_VALUE};
-
-        /*
-         * Map the range of double values to activation function output.
-         */
-        activation.activationFunction(check, 0, check.length);
-
-        /*
-         * Soft the result of the activation fuction output.
-         */
-        Arrays.sort(check);
-
-        /*
-         * Return minimum and maximum values of the activation function output.
-         */
-        return new double[]{check[0], check[check.length - 1]};
     }
 
     /**
