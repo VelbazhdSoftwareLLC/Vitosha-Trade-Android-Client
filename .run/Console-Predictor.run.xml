@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Console-Predictor" type="Application" factoryName="Application">
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+    <option name="MAIN_CLASS_NAME" value="eu.veldsoft.vitosha.trade.ConsolePredictor" />
+    <module name="Vitosha-Trade-Android-Client.Vitosha-Trade-Client" />
+    <method v="2" />
+  </configuration>
+</component>
