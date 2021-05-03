@@ -1,1 +1,3 @@
-include ':Vitosha-Trade-Client'
+rootProject.name='Vitosha-Trade-Client'
+include ':Command-Line-Interface'
+include ':Android-Interface'
