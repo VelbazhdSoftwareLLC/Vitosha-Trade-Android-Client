@@ -1,5 +1,5 @@
 plugins {
-    id 'java-library'
+    id 'application'
 }
 
 java {
@@ -8,5 +8,9 @@ java {
 }
 
 dependencies {
-    implementation project(path: ':Android-Interface', configuration: 'default')
+    implementation project(path: ':Forecasting-Engine', configuration: 'default')
+}
+
+application {
+    mainClass = 'eu.veldsoft.vitosha.trade.ConsolePredictor'
 }
