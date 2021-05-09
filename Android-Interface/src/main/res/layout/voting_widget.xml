@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#5F7F7F7F"
     android:padding="@dimen/widget_margin">
 
 
@@ -40,13 +39,13 @@
                 android:id="@+id/symbol_ticker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="EUR/USD" />
+                android:text="" />
 
             <TextView
                 android:id="@+id/current_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1.115648" />
+                android:text="" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

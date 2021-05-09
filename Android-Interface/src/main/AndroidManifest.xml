@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.veldsoft.vitosha.trade">
 
+    <uses-feature
+        android:name="android.software.live_wallpaper"
+        android:required="true" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -53,9 +57,5 @@
                 android:resource="@xml/wallpaper_info" />
         </service>
     </application>
-
-    <uses-feature
-        android:name="android.software.live_wallpaper"
-        android:required="true" />
 
 </manifest>
