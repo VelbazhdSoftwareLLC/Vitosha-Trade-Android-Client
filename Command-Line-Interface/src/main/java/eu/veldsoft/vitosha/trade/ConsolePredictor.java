@@ -7,6 +7,6 @@ import eu.veldsoft.vitosha.trade.dummy.InputData;
  */
 public class ConsolePredictor {
     public static void main(String[] args){
-        System.out.println( "Hello ..." );
+        System.out.println( InputData.SYMBOL );
     }
 }
