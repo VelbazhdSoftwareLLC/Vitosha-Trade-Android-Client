@@ -15,7 +15,6 @@ public class VotingWidget extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.voting_widget);
         views.setTextViewText(R.id.appwidget_text, widgetText);
 
-
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
