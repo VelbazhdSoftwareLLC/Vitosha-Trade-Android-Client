@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -48,7 +49,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     /**
      * Identifiers for the background resources images to be used as background.
      */
-    private static final int IMAGES_IDS[] = {
+    private static final int[] IMAGES_IDS = {
             R.drawable.vitosha_mountain_dimitar_petarchev_001,
             R.drawable.vitosha_mountain_dimitar_petarchev_002,
             R.drawable.vitosha_mountain_dimitar_petarchev_003,
@@ -92,7 +93,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
     /**
      * List of information panels rectangles information.
      */
-    private static Rect panels[] = {new Rect(), new Rect(), new Rect()};
+    private static Rect[] panels = {new Rect(), new Rect(), new Rect()};
 
     /**
      * Forecasting object.
@@ -277,10 +278,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
             int width = panels[1].right - panels[1].left;
             int height = panels[1].bottom - panels[1].top;
 
-            int pixels[] = new int[width*height];
+            int[] pixels = new int[width*height];
             predictor.drawForecast(pixels, width, height);
             Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Config.ARGB_8888);
-            canvas.drawBitmap(bitmap, panels[1], panels[1], paint);
+            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[1], paint);
         }
 
         /**
@@ -292,10 +293,10 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
             int width = panels[2].right - panels[2].left;
             int height = panels[2].bottom - panels[2].top;
 
-            int pixels[] = new int[width*height];
+            int[] pixels = new int[width*height];
             predictor.drawAnn(pixels, width, height);
             Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Config.ARGB_8888);
-            canvas.drawBitmap(bitmap, panels[2], panels[2], paint);
+            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[2], paint);
         }
 
         /**

@@ -390,13 +390,13 @@ public class Predictor {
         /*
          * Visualize past data.
          */
-        for (int i = 0; forecast.getData() != null &&
+        for (int i = 0; forecast != null && forecast.getData() != null &&
                 i < forecast.getData().length; i++) {
             int offset = (int) (height * (forecast.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
                 for(y=0; y<offset; y++) {
-                    pixels[x*height + y] = CHART_COLORS[0];
+                    pixels[x + y*width] = CHART_COLORS[0];
                 }
                 x++;
             }
@@ -405,13 +405,13 @@ public class Predictor {
         /*
          * Visualize future data.
          */
-        for (int i = 0; output.getData() != null &&
+        for (int i = 0; output != null && output.getData() != null &&
                 i < output.getData().length; i++) {
             int offset = (int) (height * (output.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
                 for(y=0; y<offset; y++) {
-                    pixels[x*height + y] = CHART_COLORS[1];
+                    pixels[x + y*width] = CHART_COLORS[1];
                 }
                 x++;
             }
@@ -426,7 +426,6 @@ public class Predictor {
      * @param height Drawing area height.
      */
     public void drawAnn(int []pixels, int width, int height) {
-
         /*
          * Artificial neural network.
          */
@@ -535,7 +534,7 @@ public class Predictor {
                 for (int y = 0, l = 0; y < height &&
                         l < topology[k].length; y += height / topology[k].length, l++) {
                     for (int dy = 0; dy < height / topology[k].length; dy++) {
-                        pixels[x*height + y] = ANN_COLORS[k];
+                        pixels[x + y*width] = ANN_COLORS[k];
 
                         int alpha = (int)(((ANN_COLORS[k]>>32) & 0xFF) * topology[k][l]);
                         int red = (int)(((ANN_COLORS[k]>>16) & 0xFF) * topology[k][l]);
@@ -544,7 +543,7 @@ public class Predictor {
 
                         int color = alpha << 32 | red << 16 | green << 8 | blue;
 
-                        pixels[x*height + y] = color;
+                        pixels[x + y*width] = color;
                     }
                 }
             }
