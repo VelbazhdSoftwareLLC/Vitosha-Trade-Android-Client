@@ -139,6 +139,11 @@ public class WeightsChromosome extends AbstractListChromosome<Double> {
     @Override
     protected void checkValidity(List<Double> values)
             throws InvalidRepresentationException {
+        if (network == null) {
+            //TODO throw new RuntimeException("Neural network should be provided for the fitness evaluation.");
+            return;
+        }
+
         /*
          * Length of the values should match the number of weights in the neural
          * network structure.
