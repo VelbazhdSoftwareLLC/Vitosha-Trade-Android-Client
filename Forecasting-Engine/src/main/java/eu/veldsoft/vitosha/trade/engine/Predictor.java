@@ -299,10 +299,10 @@ public class Predictor {
              * Obtain ANN weights.
              */
             List<Double> weights = new ArrayList<Double>();
-            for (int l = 0; l < network.getLayerCount()-1; l++) {
+            for (int l = 0; l < network.getLayerCount() - 1; l++) {
                 int bias = network.isLayerBiased(l) ? 1 : 0;
-                for (int m = 0; m < network.getLayerNeuronCount(l)+bias; m++) {
-                    for (int n = 0; n < network.getLayerNeuronCount(l+1); n++) {
+                for (int m = 0; m < network.getLayerNeuronCount(l) + bias; m++) {
+                    for (int n = 0; n < network.getLayerNeuronCount(l + 1); n++) {
                         weights.add(network.getWeight(l, m, n));
                     }
                 }
@@ -342,10 +342,10 @@ public class Predictor {
             /*
              * Replace ANN weights.
              */
-            for (int l = 0, k = 0; l < network.getLayerCount()-1; l++) {
+            for (int l = 0, k = 0; l < network.getLayerCount() - 1; l++) {
                 int bias = network.isLayerBiased(l) ? 1 : 0;
-                for (int m = 0; m < network.getLayerNeuronCount(l)+bias; m++) {
-                    for (int n = 0; n < network.getLayerNeuronCount(l+1); n++, k++) {
+                for (int m = 0; m < network.getLayerNeuronCount(l) + bias; m++) {
+                    for (int n = 0; n < network.getLayerNeuronCount(l + 1); n++, k++) {
                         network.setWeight(l, m, n, weights.get(k));
                     }
                 }
@@ -372,6 +372,16 @@ public class Predictor {
      * @param height Drawing area height.
      */
     public void drawForecast(int[] pixels, int width, int height) {
+        if (network == null) {
+            return;
+        }
+        if (forecast == null) {
+            return;
+        }
+        if (output == null) {
+            return;
+        }
+
         /*
          * Output layer activation function is used because input layer
          * has no activation function.
@@ -390,13 +400,13 @@ public class Predictor {
         /*
          * Visualize past data.
          */
-        for (int i = 0; forecast != null && forecast.getData() != null &&
+        for (int i = 0; forecast.getData() != null &&
                 i < forecast.getData().length; i++) {
             int offset = (int) (height * (forecast.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for(y=0; y<offset; y++) {
-                    pixels[x + y*width] = CHART_COLORS[0];
+                for (y = 0; y < offset; y++) {
+                    pixels[x + y * width] = CHART_COLORS[0];
                 }
                 x++;
             }
@@ -405,13 +415,13 @@ public class Predictor {
         /*
          * Visualize future data.
          */
-        for (int i = 0; output != null && output.getData() != null &&
+        for (int i = 0; output.getData() != null &&
                 i < output.getData().length; i++) {
             int offset = (int) (height * (output.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for(y=0; y<offset; y++) {
-                    pixels[x + y*width] = CHART_COLORS[1];
+                for (y = 0; y < offset; y++) {
+                    pixels[x + y * width] = CHART_COLORS[1];
                 }
                 x++;
             }
@@ -422,10 +432,20 @@ public class Predictor {
      * Draw ANN topology.
      *
      * @param pixels Array with ARGB pixels.
-     * @param width Drawing area width.
+     * @param width  Drawing area width.
      * @param height Drawing area height.
      */
-    public void drawAnn(int []pixels, int width, int height) {
+    public void drawAnn(int[] pixels, int width, int height) {
+        if (network == null) {
+            return;
+        }
+        if (forecast == null) {
+            return;
+        }
+        if (output == null) {
+            return;
+        }
+
         /*
          * Artificial neural network.
          */
@@ -534,16 +554,16 @@ public class Predictor {
                 for (int y = 0, l = 0; y < height &&
                         l < topology[k].length; y += height / topology[k].length, l++) {
                     for (int dy = 0; dy < height / topology[k].length; dy++) {
-                        pixels[x + y*width] = ANN_COLORS[k];
+                        pixels[x + y * width] = ANN_COLORS[k];
 
-                        int alpha = (int)(((ANN_COLORS[k]>>32) & 0xFF) * topology[k][l]);
-                        int red = (int)(((ANN_COLORS[k]>>16) & 0xFF) * topology[k][l]);
-                        int green = (int)(((ANN_COLORS[k]>>8) & 0xFF) * topology[k][l]);
-                        int blue = (int)((ANN_COLORS[k] & 0xFF) * topology[k][l]);
+                        int alpha = (int) (((ANN_COLORS[k] >> 32) & 0xFF) * topology[k][l]);
+                        int red = (int) (((ANN_COLORS[k] >> 16) & 0xFF) * topology[k][l]);
+                        int green = (int) (((ANN_COLORS[k] >> 8) & 0xFF) * topology[k][l]);
+                        int blue = (int) ((ANN_COLORS[k] & 0xFF) * topology[k][l]);
 
                         int color = alpha << 32 | red << 16 | green << 8 | blue;
 
-                        pixels[x + y*width] = color;
+                        pixels[x + y * width] = color;
                     }
                 }
             }
