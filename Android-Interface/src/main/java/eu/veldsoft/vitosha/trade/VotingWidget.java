@@ -5,8 +5,19 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
 
+/**
+ * User voting widget.
+ *
+ * @author Todor Balabanov
+ */
 public class VotingWidget extends AppWidgetProvider {
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetId
+     */
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
@@ -18,6 +29,9 @@ public class VotingWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
@@ -25,6 +39,9 @@ public class VotingWidget extends AppWidgetProvider {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
@@ -32,12 +49,17 @@ public class VotingWidget extends AppWidgetProvider {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onEnabled(Context context) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDisabled(Context context) {
     }
 }
-

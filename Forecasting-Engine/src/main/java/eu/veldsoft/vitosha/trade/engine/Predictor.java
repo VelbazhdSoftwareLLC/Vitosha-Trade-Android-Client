@@ -1,14 +1,5 @@
 package eu.veldsoft.vitosha.trade.engine;
 
-import org.apache.commons.math3.genetics.Chromosome;
-import org.apache.commons.math3.genetics.ElitisticListPopulation;
-import org.apache.commons.math3.genetics.FixedElapsedTime;
-import org.apache.commons.math3.genetics.GeneticAlgorithm;
-import org.apache.commons.math3.genetics.Population;
-import org.apache.commons.math3.genetics.TournamentSelection;
-import org.apache.commons.math3.genetics.UniformBinaryMutation;
-import org.apache.commons.math3.genetics.UniformCrossover;
-import org.apache.commons.math3.genetics.WeightsChromosome;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -299,54 +290,27 @@ public class Predictor {
              * Obtain ANN weights.
              */
             List<Double> weights = new ArrayList<Double>();
-            for (int l = 0; l < network.getLayerCount() - 1; l++) {
-                int bias = network.isLayerBiased(l) ? 1 : 0;
-                for (int m = 0; m < network.getLayerNeuronCount(l) + bias; m++) {
-                    for (int n = 0; n < network.getLayerNeuronCount(l + 1); n++) {
-                        weights.add(network.getWeight(l, m, n));
+            for (int layer = 0; layer < network.getLayerCount() - 1; layer++) {
+                int bias = network.isLayerBiased(layer) ? 1 : 0;
+                for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
+                    for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++) {
+                        weights.add(network.getWeight(layer, from, to));
                     }
                 }
             }
 
-            /*
-             * Generate population.
-             */
-            List<Chromosome> list = new LinkedList<Chromosome>();
-            for (int i = 0; i < populationSize; i++) {
-                list.add(new WeightsChromosome(weights, true, network, train));
-            }
-            Population initial = new ElitisticListPopulation(list,
-                    2 * list.size(), elitismRate);
-
-            /*
-             * Initialize genetic algorithm.
-             */
-            GeneticAlgorithm algorithm = new GeneticAlgorithm(
-                    new UniformCrossover<WeightsChromosome>(0.5),
-                    crossoverRate, new UniformBinaryMutation(),
-                    mutationRate, new TournamentSelection(tournamentArity));
-
-            /*
-             * Run optimization.
-             */
-            Population optimized = algorithm.evolve(initial,
-                    new FixedElapsedTime(optimizationTimeout));
-
-            /*
-             * Obtain result.
-             */
-            weights = ((WeightsChromosome)
-                    optimized.getFittestChromosome()).
-                    getRepresentation();
+            /* Do evolutionary optimization. */
+            Optimizer optimizer = new MoeaOptimizer();
+            weights = optimizer.optimize(weights);
 
             /*
              * Replace ANN weights.
              */
-            for (int l = 0, k = 0; l < network.getLayerCount() - 1; l++) {
-                int bias = network.isLayerBiased(l) ? 1 : 0;
-                for (int m = 0; m < network.getLayerNeuronCount(l) + bias; m++) {
-                    for (int n = 0; n < network.getLayerNeuronCount(l + 1); n++, k++) {
-                        network.setWeight(l, m, n, weights.get(k));
+            for (int layer = 0, index = 0; layer < network.getLayerCount() - 1; layer++) {
+                int bias = network.isLayerBiased(layer) ? 1 : 0;
+                for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
+                    for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++, index++) {
+                        network.setWeight(layer, from, to, weights.get(index));
                     }
                 }
             }
@@ -357,6 +321,9 @@ public class Predictor {
      * Neural network prediction getter.
      */
     public void predict() {
+        if (network == null) {
+            return;
+        }
         if (forecast == null) {
             return;
         }
