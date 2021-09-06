@@ -275,12 +275,12 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         private void drawForecast(Canvas canvas) {
             int width = panels[1].right - panels[1].left;
             int height = panels[1].bottom - panels[1].top;
+            int stride = width;
 
             int[] pixels = new int[width * height];
             predictor.drawForecast(pixels, width, height);
-//            Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Config.ARGB_8888);
-//            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[1], paint);
-            canvas.drawBitmap(pixels, 0, width, panels[1].left, panels[1].top, width, height, true, paint);
+            Bitmap bitmap = Bitmap.createBitmap(pixels, 0, stride, width, height, Bitmap.Config.ARGB_8888);
+            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[1], paint);
         }
 
         /**
@@ -291,12 +291,12 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         private void drawAnn(Canvas canvas) {
             int width = panels[2].right - panels[2].left;
             int height = panels[2].bottom - panels[2].top;
+            int stride = width;
 
             int[] pixels = new int[width * height];
             predictor.drawAnn(pixels, width, height);
-//            Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Config.ARGB_8888);
-//            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[2], paint);
-            canvas.drawBitmap(pixels, 0, width, panels[2].left, panels[2].top, width, height, true, paint);
+            Bitmap bitmap = Bitmap.createBitmap(pixels, 0, stride, width, height, Bitmap.Config.ARGB_8888);
+            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[2], paint);
         }
 
         /**

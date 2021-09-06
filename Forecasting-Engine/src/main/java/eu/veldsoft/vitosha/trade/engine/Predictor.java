@@ -49,19 +49,19 @@ public class Predictor {
      * Colors used in the charts.
      */
     private static final int CHART_COLORS[] = {
-            (95 << 32 | 0 << 16 | 255 << 8 | 0),
-            (95 << 32 | 255 << 16 | 0 << 8 | 0),
+            (95 << 24 | 0 << 16 | 255 << 8 | 0),
+            (95 << 24 | 255 << 16 | 0 << 8 | 0),
     };
 
     /**
      * Colors used to visualize neural networks.
      */
     private static final int ANN_COLORS[] = {
-            (95 << 32 | 0 << 16 | 255 << 8 | 0),
-            (95 << 32 | 255 << 16 | 255 << 8 | 255),
-            (95 << 32 | 0 << 16 | 0 << 8 | 255),
-            (95 << 32 | 255 << 16 | 255 << 8 | 255),
-            (95 << 32 | 255 << 16 | 0 << 8 | 0),
+            (95 << 24 | 0 << 16 | 255 << 8 | 0),
+            (95 << 24 | 255 << 16 | 255 << 8 | 255),
+            (95 << 24 | 0 << 16 | 0 << 8 | 255),
+            (95 << 24 | 255 << 16 | 255 << 8 | 255),
+            (95 << 24 | 255 << 16 | 0 << 8 | 0),
     };
 
     /**
@@ -372,7 +372,7 @@ public class Predictor {
             int offset = (int) (height * (forecast.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for (y = 0; y < offset; y++) {
+                for (y = height-offset; y < height; y++) {
                     pixels[x + y * width] = CHART_COLORS[0];
                 }
                 x++;
@@ -387,7 +387,7 @@ public class Predictor {
             int offset = (int) (height * (output.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for (y = 0; y < offset; y++) {
+                for (y = height-offset; y < height; y++) {
                     pixels[x + y * width] = CHART_COLORS[1];
                 }
                 x++;
@@ -453,28 +453,28 @@ public class Predictor {
                     (range[1] - range[0]);
         }
 
-        for (int i = 0, m = 0, n = 0; i < topology[1].length; i++) {
-            if (n >= network.getLayerNeuronCount(1)) {
-                n = 0;
-                m++;
+        for (int i = 0, from = 0, to = 0, bias = network.isLayerBiased(0) ? 1 : 0; i < topology[1].length; i++) {
+            if (to >= network.getLayerNeuronCount(1)) {
+                to = 0;
+                from++;
             }
-            if (m >= network.getLayerNeuronCount(0)) {
-                m = 0;
+            if ((from+bias) >= network.getLayerNeuronCount(0)) {
+                from = 0;
             }
-            topology[1][i] = network.getWeight(0, m, n);
-            n++;
+            topology[1][i] = network.getWeight(0, from, to);
+            to++;
         }
 
-        for (int i = 0, m = 0, n = 0; i < topology[3].length; i++) {
-            if (n >= network.getLayerNeuronCount(2)) {
-                n = 0;
-                m++;
+        for (int i = 0, from = 0, to = 0, bias = network.isLayerBiased(1) ? 1 : 0; i < topology[3].length; i++) {
+            if (to >= network.getLayerNeuronCount(2)) {
+                to = 0;
+                from++;
             }
-            if (m >= network.getLayerNeuronCount(1)) {
-                m = 0;
+            if ((from+bias) >= network.getLayerNeuronCount(1)) {
+                from = 0;
             }
-            topology[3][i] = network.getWeight(1, m, n);
-            n++;
+            topology[3][i] = network.getWeight(1, from, to);
+            to++;
         }
 
         /*
@@ -521,16 +521,14 @@ public class Predictor {
                 for (int y = 0, l = 0; y < height &&
                         l < topology[k].length; y += height / topology[k].length, l++) {
                     for (int dy = 0; dy < height / topology[k].length; dy++) {
-                        pixels[x + y * width] = ANN_COLORS[k];
-
-                        int alpha = (int) (((ANN_COLORS[k] >> 32) & 0xFF) * topology[k][l]);
+                        int alpha = (int) (((ANN_COLORS[k] >> 24) & 0xFF) * topology[k][l]);
                         int red = (int) (((ANN_COLORS[k] >> 16) & 0xFF) * topology[k][l]);
                         int green = (int) (((ANN_COLORS[k] >> 8) & 0xFF) * topology[k][l]);
                         int blue = (int) ((ANN_COLORS[k] & 0xFF) * topology[k][l]);
 
-                        int color = alpha << 32 | red << 16 | green << 8 | blue;
+                        int color = alpha << 24 | red << 16 | green << 8 | blue;
 
-                        pixels[x + y * width] = color;
+                        pixels[(x+dx) + (y+dy) * width] = color;
                     }
                 }
             }
