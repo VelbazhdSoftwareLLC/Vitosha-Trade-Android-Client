@@ -25,7 +25,7 @@ import eu.veldsoft.vitosha.trade.engine.Predictor;
  *
  * @author Todor Balabanov
  */
-public class VitoshaTradeWallpaperService extends WallpaperService {
+public class ProgressReportingWallpaperService extends WallpaperService {
 
     /**
      * Pseudo-random number generator.
@@ -107,7 +107,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
          */
         HttpHelper helper = new HttpHelper(PreferenceManager
                 .getDefaultSharedPreferences(
-                        VitoshaTradeWallpaperService.this).
+                        ProgressReportingWallpaperService.this).
                         getString("server_url", "localhost"));
 
         if (helper.load() == false) {
@@ -212,7 +212,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
              * Change picture according the day in the year.
              */
             Bitmap image = BitmapFactory.decodeResource(
-                    VitoshaTradeWallpaperService.this.getResources(),
+                    ProgressReportingWallpaperService.this.getResources(),
                     IMAGES_IDS[Calendar.getInstance().
                             get(Calendar.DAY_OF_YEAR) % IMAGES_IDS.length]);
 
@@ -304,7 +304,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
          */
         @Override
         public void onVisibilityChanged(boolean visible) {
-            VitoshaTradeWallpaperService.visible = visible;
+            ProgressReportingWallpaperService.visible = visible;
 
             /*
              * Do calculations only if the wallpaper is visible.
@@ -322,7 +322,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
-            VitoshaTradeWallpaperService.visible = false;
+            ProgressReportingWallpaperService.visible = false;
             handler.removeCallbacks(trainer);
         }
 
@@ -339,7 +339,7 @@ public class VitoshaTradeWallpaperService extends WallpaperService {
 
             SharedPreferences preferences = PreferenceManager
                     .getDefaultSharedPreferences(
-                            VitoshaTradeWallpaperService.this);
+                            ProgressReportingWallpaperService.this);
 
             int panelsSideSize = Integer.parseInt(
                     preferences.getString("sizing", "100"));

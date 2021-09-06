@@ -43,7 +43,7 @@
         </receiver>
 
         <service
-            android:name=".VitoshaTradeWallpaperService"
+            android:name=".ProgressReportingWallpaperService"
             android:enabled="true"
             android:label="@string/vitosha_trade_wallpaper_label"
             android:permission="android.permission.BIND_WALLPAPER">

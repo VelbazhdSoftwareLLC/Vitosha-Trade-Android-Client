@@ -38,7 +38,7 @@ public class WallpaperConfigureActivity extends PreferenceActivity {
          */
         if (preferences.getBoolean("set_wallpaper", false) == false) {
             stopService(new Intent(WallpaperConfigureActivity.this,
-                    VitoshaTradeWallpaperService.class));
+                    ProgressReportingWallpaperService.class));
             startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
             WallpaperConfigureActivity.this.finish();
 
@@ -51,7 +51,7 @@ public class WallpaperConfigureActivity extends PreferenceActivity {
         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
         intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
                 new ComponentName(WallpaperConfigureActivity.this,
-                        VitoshaTradeWallpaperService.class));
+                        ProgressReportingWallpaperService.class));
         startActivity(intent);
         WallpaperConfigureActivity.this.finish();
     }
