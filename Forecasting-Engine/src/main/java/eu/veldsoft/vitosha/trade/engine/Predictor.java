@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -284,7 +283,8 @@ public class Predictor {
             double crossoverRate = PRNG.nextInt(900) / 1000D;
             double mutationRate = PRNG.nextInt(10) / 1000D;
             int tournamentArity = PRNG.nextBoolean() ? 1 : 2;
-            long optimizationTimeout = 1;
+            double scalingFactor = PRNG.nextInt(500) / 1000D;
+            long optimizationTimeout = 1000;
 
             /*
              * Obtain ANN weights.
@@ -300,7 +300,7 @@ public class Predictor {
             }
 
             /* Do evolutionary optimization. */
-            Optimizer optimizer = new MoeaOptimizer();
+            Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, train, populationSize, crossoverRate, scalingFactor);
             weights = optimizer.optimize(weights);
 
             /*
@@ -372,7 +372,7 @@ public class Predictor {
             int offset = (int) (height * (forecast.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for (y = height-offset; y < height; y++) {
+                for (y = height - offset; y < height; y++) {
                     pixels[x + y * width] = CHART_COLORS[0];
                 }
                 x++;
@@ -387,7 +387,7 @@ public class Predictor {
             int offset = (int) (height * (output.getData()[i] - range[0]) /
                     (range[1] - range[0]));
             for (int dx = 0; dx < width / numberOfValues; dx++) {
-                for (y = height-offset; y < height; y++) {
+                for (y = height - offset; y < height; y++) {
                     pixels[x + y * width] = CHART_COLORS[1];
                 }
                 x++;
@@ -458,7 +458,7 @@ public class Predictor {
                 to = 0;
                 from++;
             }
-            if ((from+bias) >= network.getLayerNeuronCount(0)) {
+            if ((from + bias) >= network.getLayerNeuronCount(0)) {
                 from = 0;
             }
             topology[1][i] = network.getWeight(0, from, to);
@@ -470,7 +470,7 @@ public class Predictor {
                 to = 0;
                 from++;
             }
-            if ((from+bias) >= network.getLayerNeuronCount(1)) {
+            if ((from + bias) >= network.getLayerNeuronCount(1)) {
                 from = 0;
             }
             topology[3][i] = network.getWeight(1, from, to);
@@ -528,7 +528,7 @@ public class Predictor {
 
                         int color = alpha << 24 | red << 16 | green << 8 | blue;
 
-                        pixels[(x+dx) + (y+dy) * width] = color;
+                        pixels[(x + dx) + (y + dy) * width] = color;
                     }
                 }
             }

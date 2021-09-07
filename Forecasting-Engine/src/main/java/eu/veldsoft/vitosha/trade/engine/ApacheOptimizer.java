@@ -1,8 +1,5 @@
 package eu.veldsoft.vitosha.trade.engine;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.commons.math3.genetics.Chromosome;
 import org.apache.commons.math3.genetics.ElitisticListPopulation;
 import org.apache.commons.math3.genetics.FixedElapsedTime;
@@ -14,6 +11,9 @@ import org.apache.commons.math3.genetics.UniformCrossover;
 import org.apache.commons.math3.genetics.WeightsChromosome;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.training.propagation.Propagation;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Apache Common Math Genetic Algorithms based optimizer.
@@ -62,7 +62,6 @@ public class ApacheOptimizer implements Optimizer {
     private final double elitismRate;
 
     /**
-     *
      * @param optimizationTimeout
      * @param network
      * @param train
