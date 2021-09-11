@@ -13,7 +13,7 @@ import android.preference.PreferenceManager;
  *
  * @author Todor Balabanov
  */
-public class WallpaperConfigureActivity extends PreferenceActivity {
+public class ProgressReportingWallpaperConfigureActivity extends PreferenceActivity {
 
     /**
      * {@inheritDoc}
@@ -31,16 +31,16 @@ public class WallpaperConfigureActivity extends PreferenceActivity {
     protected void onPause() {
         super.onPause();
         SharedPreferences preferences = PreferenceManager
-                .getDefaultSharedPreferences(WallpaperConfigureActivity.this);
+                .getDefaultSharedPreferences(ProgressReportingWallpaperConfigureActivity.this);
 
         /*
          * Remove our wallpaper.
          */
         if (preferences.getBoolean("set_wallpaper", false) == false) {
-            stopService(new Intent(WallpaperConfigureActivity.this,
+            stopService(new Intent(ProgressReportingWallpaperConfigureActivity.this,
                     ProgressReportingWallpaperService.class));
             startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
-            WallpaperConfigureActivity.this.finish();
+            ProgressReportingWallpaperConfigureActivity.this.finish();
 
             return;
         }
@@ -50,9 +50,9 @@ public class WallpaperConfigureActivity extends PreferenceActivity {
          */
         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
         intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                new ComponentName(WallpaperConfigureActivity.this,
+                new ComponentName(ProgressReportingWallpaperConfigureActivity.this,
                         ProgressReportingWallpaperService.class));
         startActivity(intent);
-        WallpaperConfigureActivity.this.finish();
+        ProgressReportingWallpaperConfigureActivity.this.finish();
     }
 }

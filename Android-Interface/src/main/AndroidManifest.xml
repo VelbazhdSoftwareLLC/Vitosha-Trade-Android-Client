@@ -19,7 +19,7 @@
         </activity>
 
         <activity
-            android:name=".WallpaperConfigureActivity"
+            android:name=".ProgressReportingWallpaperConfigureActivity"
             android:label="@string/title_activity_options"
             android:launchMode="singleInstance"
             android:noHistory="true">
