@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
 
+import eu.veldsoft.vitosha.trade.dummy.InputData;
+
 /**
  * User voting widget.
  *
@@ -25,6 +27,10 @@ public class VotingWidget extends AppWidgetProvider {
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.voting_widget);
         views.setTextViewText(R.id.appwidget_text, widgetText);
+
+        //TODO Information should be taken from other source.
+        views.setTextViewText(R.id.symbol_ticker, InputData.SYMBOL);
+        views.setTextViewText(R.id.current_value, ""+InputData.OPEN[InputData.OPEN.length-1]);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
