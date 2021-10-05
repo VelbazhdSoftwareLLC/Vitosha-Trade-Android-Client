@@ -15,10 +15,11 @@ import eu.veldsoft.vitosha.trade.dummy.InputData;
 public class VotingWidget extends AppWidgetProvider {
 
     /**
+     * Update widget information.
      *
-     * @param context
-     * @param appWidgetManager
-     * @param appWidgetId
+     * @param context Widget context.
+     * @param appWidgetManager Widget manager.
+     * @param appWidgetId Widget identifier.
      */
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {

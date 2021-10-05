@@ -17,24 +17,26 @@ import java.util.List;
 public class AnnErrorMinimizationProblem extends AbstractProblem {
 
     /**
-     *
+     * Artificial neural network reference.
      */
     private BasicNetwork network;
 
     /**
-     *
+     * Training rule reference.
      */
     private Propagation train;
 
     /**
-     *
+     * Initial values for artificial neural network weights.
      */
     private List<Double> initial;
 
     /**
-     * @param solution
-     * @param network
-     * @param train
+     * Constructor with all parameters.
+     *
+     * @param solution Initial weights.
+     * @param network Artificial neural network reference.
+     * @param train Training rule reference.
      */
     public AnnErrorMinimizationProblem(List<Double> solution, BasicNetwork network, Propagation train) {
         this(solution.size(), 1);

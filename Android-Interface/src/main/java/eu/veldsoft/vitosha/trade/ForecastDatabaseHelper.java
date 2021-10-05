@@ -11,24 +11,24 @@ import android.provider.BaseColumns;
  * @author Todor Balabanov
  */
 class ForecastDatabaseHelper extends SQLiteOpenHelper {
-    /**
-     * Database integer version.
-     */
+    /** Database integer version. */
     public static final int DATABASE_VERSION = 1;
-    /**
-     * Database file name.
-     */
+
+    /** Database file name. */
     public static final String DATABASE_NAME = "Forecast.db";
+
     /**
      * Drop rates table SQL pattern.
      */
     static final String SQL_DELETE_RATES = "DROP TABLE IF EXISTS "
             + RatesColumns.TABLE_NAME;
+
     /**
      * Drop rates table SQL pattern.
      */
     static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS "
             + ANNsColumns.TABLE_NAME;
+
     /**
      * Create rates table SQL patter.
      */

@@ -26,43 +26,44 @@ import java.util.List;
  */
 public class MoeaOptimizer implements Optimizer {
     /**
-     *
+     * Optimization time.
      */
     private final long optimizationTimeout;
 
     /**
-     *
+     * Artificial nerural network reference.
      */
     private final BasicNetwork network;
 
     /**
-     *
+     * Training rule reference.
      */
     private final Propagation train;
 
     /**
-     *
+     * Evolutionary algorithm population size.
      */
     private final int populationSize;
 
     /**
-     *
+     * Crossover rate.
      */
     private final double crossoverRate;
 
     /**
-     *
+     * Differential evolution scaling factor.
      */
     private final double scalingFactor;
 
     /**
+     * Constructor with all parameters.
      *
-     * @param optimizationTimeout
-     * @param network
-     * @param train
-     * @param populationSize
-     * @param crossoverRate
-     * @param scalingFactor
+     * @param optimizationTimeout Optimization time.
+     * @param network Artificial neural network reference.
+     * @param train Training rule reference.
+     * @param populationSize Evolutionary algorithm population size.
+     * @param crossoverRate Crossover rate.
+     * @param scalingFactor Differential evolution scaling factor.
      */
     public MoeaOptimizer(long optimizationTimeout, BasicNetwork network, Propagation train, int populationSize, double crossoverRate, double scalingFactor) {
         this.optimizationTimeout = optimizationTimeout;

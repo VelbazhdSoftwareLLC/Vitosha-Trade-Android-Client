@@ -17,10 +17,12 @@ public class WeightsChromosome extends AbstractListChromosome<Double> {
      * Lazy initialization and buffering for the fitness value.
      */
     double fitness = -(Double.MAX_VALUE - 1);
+
     /**
      * Reference to external neural network object.
      */
     private BasicNetwork network = null;
+
     /**
      * Reference to external training strategy object.
      */

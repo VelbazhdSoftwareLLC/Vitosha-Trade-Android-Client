@@ -30,74 +30,92 @@ public class HttpHelper {
      * Number of ANN found as response of the request.
      */
     private static final String JSON_SIZE_KEY = "size";
+
     /**
      * Time series symbol ticker.
      */
     private static final String JSON_SYMBOL_KEY = "symbol";
+
     /**
      * Time series period as integer number of minutes.
      */
     private static final String JSON_PERIOD_KEY = "period";
+
     /**
      * Fitness value of the ANN.
      */
     private static final String JSON_FITNESS_KEY = "fitness";
+
     /**
      * Array with neurons flags.
      */
     private static final String JSON_FLAGS_KEY = "flags";
+
     /**
      * Array with ANN weights.
      */
     private static final String JSON_WEIGHTS_KEY = "weights";
+
     /**
      * Array with ANN connections activities.
      */
     private static final String JSON_ACTIVITIES_KEY = "activities";
+
     /**
      * Number of training examples.
      */
     private static final String JSON_NUMBER_OF_EXAMPLES_KEY = "numberOfExamples";
+
     /**
      * Time array.
      */
     private static final String JSON_TIME_KEY = "time";
+
     /**
      * Open array.
      */
     private static final String JSON_OPEN_KEY = "open";
+
     /**
      * Low array.
      */
     private static final String JSON_LOW_KEY = "low";
+
     /**
      * High array.
      */
     private static final String JSON_HIGH_KEY = "high";
+
     /**
      * Close array.
      */
     private static final String JSON_CLOSE_KEY = "close";
+
     /**
      * Volume array.
      */
     private static final String JSON_VOLUME_KEY = "volume";
+
     /**
      * Load random ANN remote server script name.
      */
     private final String LOAD_RANDOM_ANN_SCRIPT = "logic/json_load_random_ann.php";
+
     /**
      * Loading training set for particular ticker and time period.
      */
     private final String LOAD_TRAINING_SET_SCRIPT = "logic/json_load_training_set.php";
+
     /**
      * Report retrained ANN remote server script name.
      */
     private final String SAVE_RETRAINED_ANN_SCRIPT = "logic/save_retrained_ann.php";
+
     /**
      * Number of neurons for the ANN.
      */
     private final String JSON_NUMBER_OF_NEURONS_KEY = "numberOfNeurons";
+
     /**
      * Remote server URl address.
      */

@@ -16,62 +16,71 @@ import android.widget.EditText;
  */
 public class VotingWidgetConfigureActivity extends Activity {
 
-    /** */
+    /** Default remote server URL. */
     private static final String PREFS_NAME = "eu.veldsoft.vitosha.trade.VotingWidget";
 
-    /** */
+    /** Preferences key prefix. */
     private static final String PREF_PREFIX_KEY = "appwidget_";
 
-    /** */
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    /** Widget identifier. */
+    private int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
-    /** */
-    EditText mAppWidgetText;
+    /** Widget text. */
+    private EditText widgetText;
 
-    /** */
-    View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
+    /** On click event handler. */
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        /**
+         * On click event.
+         *
+         * @param view Event sender.
+         */
+        public void onClick(View view) {
             final Context context = VotingWidgetConfigureActivity.this;
 
-            String widgetText = mAppWidgetText.getText().toString();
-            saveTitlePref(context, mAppWidgetId, widgetText);
+            String widgetText = VotingWidgetConfigureActivity.this.widgetText.getText().toString();
+            saveTitlePref(context, widgetId, widgetText);
 
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            VotingWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+            VotingWidget.updateAppWidget(context, appWidgetManager, widgetId);
 
             Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             setResult(RESULT_OK, resultValue);
             finish();
         }
     };
 
-    /** */
+    /**
+     * Widget configuration constructor.
+     */
     public VotingWidgetConfigureActivity() {
         super();
     }
 
     /**
+     * Save preferences title.
      *
-     * @param context
-     * @param appWidgetId
-     * @param text
+     * @param context Preferences context.
+     * @param widgetId Widget identifier.
+     * @param text Title text.
      */
-    static void saveTitlePref(Context context, int appWidgetId, String text) {
+    static void saveTitlePref(Context context, int widgetId, String text) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
+        prefs.putString(PREF_PREFIX_KEY + widgetId, text);
         prefs.apply();
     }
 
     /**
+     * Load preferences title.
      *
-     * @param context
-     * @param appWidgetId
-     * @return
+     * @param context Preferences context.
+     * @param widgetId Widget identifier.
+     * @return Title text.
      */
-    static String loadTitlePref(Context context, int appWidgetId) {
+    static String loadTitlePref(Context context, int widgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
+        String titleValue = prefs.getString(PREF_PREFIX_KEY + widgetId, null);
         if (titleValue != null) {
             return titleValue;
         } else {
@@ -80,13 +89,14 @@ public class VotingWidgetConfigureActivity extends Activity {
     }
 
     /**
+     * Delete preferences title.
      *
-     * @param context
-     * @param appWidgetId
+     * @param context Preferences context.
+     * @param widgetId Widget identifier.
      */
-    static void deleteTitlePref(Context context, int appWidgetId) {
+    static void deleteTitlePref(Context context, int widgetId) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId);
+        prefs.remove(PREF_PREFIX_KEY + widgetId);
         prefs.apply();
     }
 
@@ -100,21 +110,21 @@ public class VotingWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.voting_widget_configure);
-        mAppWidgetText = (EditText) findViewById(R.id.appwidget_text);
-        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
+        widgetText = (EditText) findViewById(R.id.appwidget_text);
+        findViewById(R.id.add_button).setOnClickListener(onClickListener);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            mAppWidgetId = extras.getInt(
+            widgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+        if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
             return;
         }
 
-        mAppWidgetText.setText(loadTitlePref(VotingWidgetConfigureActivity.this, mAppWidgetId));
+        widgetText.setText(loadTitlePref(VotingWidgetConfigureActivity.this, widgetId));
     }
 }

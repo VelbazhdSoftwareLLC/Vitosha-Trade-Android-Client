@@ -22,54 +22,56 @@ import java.util.List;
  */
 public class ApacheOptimizer implements Optimizer {
     /**
-     *
+     * Optimization time.
      */
     private final long optimizationTimeout;
 
     /**
-     *
+     * Artificial neural network reference.
      */
     private final BasicNetwork network;
 
     /**
-     *
+     * Training rule reference.
      */
     private final Propagation train;
 
     /**
-     *
+     * Evolutionary algorithm population size.
      */
     private final int populationSize;
 
     /**
-     *
+     * Tournament selection arity.
      */
     private final int tournamentArity;
 
     /**
-     *
+     * Crossover rate.
      */
     private final double crossoverRate;
 
     /**
-     *
+     * Mutation rate.
      */
     private final double mutationRate;
 
     /**
-     *
+     * Elitism rate.
      */
     private final double elitismRate;
 
     /**
-     * @param optimizationTimeout
-     * @param network
-     * @param train
-     * @param populationSize
-     * @param tournamentArity
-     * @param crossoverRate
-     * @param mutationRate
-     * @param elitismRate
+     * Constructor with all parameters.
+     *
+     * @param optimizationTimeout Optimization time.
+     * @param network Artificial neural network reference.
+     * @param train Training rule reference.
+     * @param populationSize Evolutionary algorithm population size.
+     * @param tournamentArity Tournament selection arity.
+     * @param crossoverRate Crossover rate.
+     * @param mutationRate Mutation rate.
+     * @param elitismRate Elitism rate.
      */
     public ApacheOptimizer(long optimizationTimeout, BasicNetwork network, Propagation train, int populationSize, int tournamentArity, double crossoverRate, double mutationRate, double elitismRate) {
         this.optimizationTimeout = optimizationTimeout;
