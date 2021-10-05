@@ -8,12 +8,18 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
+import java.util.logging.Logger;
+
 /**
  * Options screen.
  *
  * @author Todor Balabanov
  */
 public class ProgressReportingWallpaperConfigureActivity extends PreferenceActivity {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * {@inheritDoc}

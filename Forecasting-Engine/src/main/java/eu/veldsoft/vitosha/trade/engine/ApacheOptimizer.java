@@ -14,6 +14,7 @@ import org.encog.neural.networks.training.propagation.Propagation;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Apache Common Math Genetic Algorithms based optimizer.
@@ -21,6 +22,11 @@ import java.util.List;
  * @author Todor Balabanov
  */
 public class ApacheOptimizer implements Optimizer {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
+
     /**
      * Optimization time.
      */

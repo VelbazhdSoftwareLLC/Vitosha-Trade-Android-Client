@@ -14,6 +14,7 @@ import android.view.SurfaceHolder;
 
 import java.util.Calendar;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import eu.veldsoft.vitosha.trade.communication.HttpHelper;
 import eu.veldsoft.vitosha.trade.communication.TimePeriod;
@@ -26,6 +27,10 @@ import eu.veldsoft.vitosha.trade.engine.Predictor;
  * @author Todor Balabanov
  */
 public class ProgressReportingWallpaperService extends WallpaperService {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * Pseudo-random number generator.

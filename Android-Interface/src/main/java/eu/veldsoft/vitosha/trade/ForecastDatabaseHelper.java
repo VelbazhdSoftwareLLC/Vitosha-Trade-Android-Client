@@ -5,12 +5,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+import java.util.logging.Logger;
+
 /**
  * Database helper class.
  *
  * @author Todor Balabanov
  */
 class ForecastDatabaseHelper extends SQLiteOpenHelper {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
+
     /** Database integer version. */
     public static final int DATABASE_VERSION = 1;
 

@@ -6,6 +6,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Uniform random bits mutation applied over vector of double values.
@@ -13,6 +14,10 @@ import java.util.List;
  * @author Todor Balabanov
  */
 public class UniformBinaryMutation implements MutationPolicy {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * Pseudo random number generator.

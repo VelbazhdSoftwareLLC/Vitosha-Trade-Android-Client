@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import eu.veldsoft.vitosha.trade.communication.NeuronType;
 import eu.veldsoft.vitosha.trade.dummy.InputData;
@@ -36,6 +37,10 @@ import eu.veldsoft.vitosha.trade.dummy.InputData;
  * @author Todor Balabanov
  */
 public class Predictor {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * Pseudo-random number generator.
@@ -319,16 +324,20 @@ public class Predictor {
 
     /**
      * Neural network prediction getter.
+     *
+     * @return Forecasted values.
      */
-    public void predict() {
+    public double[] predict() {
         if (network == null) {
-            return;
+            return new double[0];
         }
         if (forecast == null) {
-            return;
+            return new double[0];
         }
 
         output = network.compute(forecast);
+
+        return output.getData();
     }
 
     /**

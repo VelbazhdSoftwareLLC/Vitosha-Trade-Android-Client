@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
 
+import java.util.logging.Logger;
+
 import eu.veldsoft.vitosha.trade.dummy.InputData;
 
 /**
@@ -13,6 +15,10 @@ import eu.veldsoft.vitosha.trade.dummy.InputData;
  * @author Todor Balabanov
  */
 public class VotingWidget extends AppWidgetProvider {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * Update widget information.

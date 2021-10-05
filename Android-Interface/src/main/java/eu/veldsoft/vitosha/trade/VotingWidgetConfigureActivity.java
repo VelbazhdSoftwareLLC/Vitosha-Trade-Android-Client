@@ -9,12 +9,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
+import java.util.logging.Logger;
+
 /**
  * Voting widget preference activity.
  *
  * @author Todor Balabanov
  */
 public class VotingWidgetConfigureActivity extends Activity {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /** Default remote server URL. */
     private static final String PREFS_NAME = "eu.veldsoft.vitosha.trade.VotingWidget";

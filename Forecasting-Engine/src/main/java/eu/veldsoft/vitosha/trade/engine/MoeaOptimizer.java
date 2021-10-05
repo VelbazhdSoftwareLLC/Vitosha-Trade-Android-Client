@@ -18,6 +18,7 @@ import org.moeaframework.problem.misc.AnnErrorMinimizationProblem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * MOEA Framework based optimizer.
@@ -25,6 +26,11 @@ import java.util.List;
  * @author Todor Balabanov
  */
 public class MoeaOptimizer implements Optimizer {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
+
     /**
      * Optimization time.
      */

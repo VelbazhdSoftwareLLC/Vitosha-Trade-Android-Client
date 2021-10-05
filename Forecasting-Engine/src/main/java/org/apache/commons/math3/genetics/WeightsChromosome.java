@@ -4,6 +4,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.training.Train;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Chromosome with double values of the weights from the artificial neural
@@ -12,6 +13,10 @@ import java.util.List;
  * @author Todor Balabanov
  */
 public class WeightsChromosome extends AbstractListChromosome<Double> {
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
     /**
      * Lazy initialization and buffering for the fitness value.
