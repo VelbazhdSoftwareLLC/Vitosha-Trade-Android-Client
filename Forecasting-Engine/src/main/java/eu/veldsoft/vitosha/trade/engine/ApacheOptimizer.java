@@ -40,7 +40,7 @@ public class ApacheOptimizer implements Optimizer {
     /**
      * Training rule reference.
      */
-    private final Propagation train;
+    private final Propagation propagation;
 
     /**
      * Evolutionary algorithm population size.
@@ -72,17 +72,17 @@ public class ApacheOptimizer implements Optimizer {
      *
      * @param optimizationTimeout Optimization time.
      * @param network Artificial neural network reference.
-     * @param train Training rule reference.
+     * @param propagation Training rule reference.
      * @param populationSize Evolutionary algorithm population size.
      * @param tournamentArity Tournament selection arity.
      * @param crossoverRate Crossover rate.
      * @param mutationRate Mutation rate.
      * @param elitismRate Elitism rate.
      */
-    public ApacheOptimizer(long optimizationTimeout, BasicNetwork network, Propagation train, int populationSize, int tournamentArity, double crossoverRate, double mutationRate, double elitismRate) {
+    public ApacheOptimizer(long optimizationTimeout, BasicNetwork network, Propagation propagation, int populationSize, int tournamentArity, double crossoverRate, double mutationRate, double elitismRate) {
         this.optimizationTimeout = optimizationTimeout;
         this.network = network;
-        this.train = train;
+        this.propagation = propagation;
         this.populationSize = populationSize;
         this.tournamentArity = tournamentArity;
         this.crossoverRate = crossoverRate;
@@ -101,7 +101,7 @@ public class ApacheOptimizer implements Optimizer {
          */
         List<Chromosome> chromosomes = new LinkedList<Chromosome>();
         for (int i = 0; i < populationSize; i++) {
-            chromosomes.add(new WeightsChromosome(weights, true, network, train));
+            chromosomes.add(new WeightsChromosome(weights, true, network, propagation));
         }
         Population initial = new ElitisticListPopulation(chromosomes,
                 2 * chromosomes.size(), elitismRate);

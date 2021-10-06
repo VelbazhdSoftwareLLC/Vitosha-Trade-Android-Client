@@ -15,7 +15,11 @@ import org.encog.ml.data.market.loader.MarketLoader;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.Propagation;
+import org.encog.neural.networks.training.propagation.back.Backpropagation;
+import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
+import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,7 +95,7 @@ public class Predictor {
     /**
      * Training rule object.
      */
-    private static Propagation train = null;
+    private static Propagation propagation = null;
 
     /**
      * Lowest and highest values of particular activation function. It is used for time series scaling.
@@ -234,6 +238,18 @@ public class Predictor {
         double range[] = findLowAndHigh(network.getActivation(2));
 
         /*
+         * Use only half of the range. It is done just to provide buffer above the central line and
+         * below the central line.
+         */
+        double difference = Math.abs(range[1] - range[0]);
+        range[0] -= difference / 2D;
+        range[1] -= difference / 2D;
+        range[0] /= 2D;
+        range[1] /= 2D;
+        range[0] += difference / 2D;
+        range[1] += difference / 2D;
+
+        /*
          * Prepare training set.
          */
         double input[][] = new double[values.length -
@@ -274,14 +290,22 @@ public class Predictor {
             return;
         }
 
-        train = new ResilientPropagation(network, examples);
+        /* Select a random gradient-based training. */
+        Propagation[] propagations = {
+                new Backpropagation(network, examples),
+                new ResilientPropagation(network, examples),
+                new QuickPropagation(network, examples),
+                new ScaledConjugateGradient(network, examples),
+                new ManhattanPropagation(network, examples, PRNG.nextDouble())
+        };
+        propagation = propagations[PRNG.nextInt(propagations.length)];
 
         /*
          * Switch between backpropagation and genetic algorithm.
          */
         if (PRNG.nextBoolean() == true) {
-            train.iteration();
-            train.finishTraining();
+            propagation.iteration();
+            propagation.finishTraining();
         } else {
             int populationSize = 4 + PRNG.nextInt(33);
             double elitismRate = PRNG.nextInt(100) / 1000D;
@@ -305,7 +329,7 @@ public class Predictor {
             }
 
             /* Do evolutionary optimization. */
-            Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, train, populationSize, crossoverRate, scalingFactor);
+            Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor);
             weights = optimizer.optimize(weights);
 
             /*

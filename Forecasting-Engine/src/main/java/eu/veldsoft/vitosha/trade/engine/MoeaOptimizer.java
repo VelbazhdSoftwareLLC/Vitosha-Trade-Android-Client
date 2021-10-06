@@ -5,14 +5,25 @@ import org.encog.neural.networks.training.propagation.Propagation;
 import org.moeaframework.algorithm.AbstractAlgorithm;
 import org.moeaframework.algorithm.single.AggregateObjectiveComparator;
 import org.moeaframework.algorithm.single.DifferentialEvolution;
+import org.moeaframework.algorithm.single.EvolutionStrategy;
+import org.moeaframework.algorithm.single.GeneticAlgorithm;
 import org.moeaframework.algorithm.single.LinearDominanceComparator;
+import org.moeaframework.algorithm.single.SelfAdaptiveNormalVariation;
 import org.moeaframework.core.Initialization;
 import org.moeaframework.core.NondominatedPopulation;
+import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Problem;
+import org.moeaframework.core.Selection;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.InjectedInitialization;
+import org.moeaframework.core.operator.TournamentSelection;
+import org.moeaframework.core.operator.UniformCrossover;
+import org.moeaframework.core.operator.UniformSelection;
+import org.moeaframework.core.operator.permutation.Insertion;
 import org.moeaframework.core.operator.real.DifferentialEvolutionSelection;
 import org.moeaframework.core.operator.real.DifferentialEvolutionVariation;
+import org.moeaframework.core.operator.real.UM;
 import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.problem.misc.AnnErrorMinimizationProblem;
 
@@ -44,7 +55,7 @@ public class MoeaOptimizer implements Optimizer {
     /**
      * Training rule reference.
      */
-    private final Propagation train;
+    private final Propagation propagation;
 
     /**
      * Evolutionary algorithm population size.
@@ -57,6 +68,11 @@ public class MoeaOptimizer implements Optimizer {
     private final double crossoverRate;
 
     /**
+     * Mutation rate.
+     */
+    private final double mutationRate;
+
+    /**
      * Differential evolution scaling factor.
      */
     private final double scalingFactor;
@@ -66,17 +82,19 @@ public class MoeaOptimizer implements Optimizer {
      *
      * @param optimizationTimeout Optimization time.
      * @param network Artificial neural network reference.
-     * @param train Training rule reference.
+     * @param propagation Training rule reference.
      * @param populationSize Evolutionary algorithm population size.
      * @param crossoverRate Crossover rate.
+     * @param mutationRate Mutation rate.
      * @param scalingFactor Differential evolution scaling factor.
      */
-    public MoeaOptimizer(long optimizationTimeout, BasicNetwork network, Propagation train, int populationSize, double crossoverRate, double scalingFactor) {
+    public MoeaOptimizer(long optimizationTimeout, BasicNetwork network, Propagation propagation, int populationSize, double crossoverRate, double mutationRate, double scalingFactor) {
         this.optimizationTimeout = optimizationTimeout;
         this.network = network;
-        this.train = train;
+        this.propagation = propagation;
         this.populationSize = populationSize;
         this.crossoverRate = crossoverRate;
+        this.mutationRate = mutationRate;
         this.scalingFactor = scalingFactor;
     }
 
@@ -85,7 +103,7 @@ public class MoeaOptimizer implements Optimizer {
      */
     @Override
     public List<Double> optimize(List<Double> weights) {
-        Problem problem = new AnnErrorMinimizationProblem(weights, network, train);
+        Problem problem = new AnnErrorMinimizationProblem(weights, network, propagation);
 
         List<Solution> solutions = new ArrayList<Solution>();
         for (int i = 0; i < populationSize; i++) {
@@ -95,10 +113,20 @@ public class MoeaOptimizer implements Optimizer {
 
         AggregateObjectiveComparator comparator = new LinearDominanceComparator();
         Initialization initialization = new InjectedInitialization(problem, populationSize, solutions);
-        DifferentialEvolutionSelection selection = new DifferentialEvolutionSelection();
-        DifferentialEvolutionVariation variation = new DifferentialEvolutionVariation(crossoverRate, scalingFactor);
 
-        AbstractAlgorithm algorithm = new DifferentialEvolution(problem, comparator, initialization, selection, variation);
+        /* Select a random evolutionary optimizer. */
+        Selection[] selections = {new TournamentSelection(), new UniformSelection()};
+        AbstractAlgorithm[] algorithms = {
+                new EvolutionStrategy(problem, comparator, initialization,
+                        new SelfAdaptiveNormalVariation()),
+                new GeneticAlgorithm(problem, comparator, initialization,
+                        selections[PRNG.nextInt(selections.length)],
+                        new GAVariation(new UniformCrossover(crossoverRate), new Insertion(mutationRate))),
+                new DifferentialEvolution(problem, comparator, initialization,
+                        new DifferentialEvolutionSelection(),
+                        new DifferentialEvolutionVariation(crossoverRate, scalingFactor))
+        };
+        AbstractAlgorithm algorithm = algorithms[PRNG.nextInt(algorithms.length)];
 
         long stop = System.currentTimeMillis() + optimizationTimeout;
         while (System.currentTimeMillis() < stop) {
