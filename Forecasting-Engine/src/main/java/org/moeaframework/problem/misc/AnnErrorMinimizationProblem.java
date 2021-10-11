@@ -29,7 +29,7 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
     /**
      * Training rule reference.
      */
-    private Propagation train;
+    private Propagation propagation;
 
     /**
      * Initial values for artificial neural network weights.
@@ -41,13 +41,13 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
      *
      * @param solution Initial weights.
      * @param network Artificial neural network reference.
-     * @param train Training rule reference.
+     * @param propagation Training rule reference.
      */
-    public AnnErrorMinimizationProblem(List<Double> solution, BasicNetwork network, Propagation train) {
+    public AnnErrorMinimizationProblem(List<Double> solution, BasicNetwork network, Propagation propagation) {
         this(solution.size(), 1);
         initial = solution;
         this.network = network;
-        this.train = train;
+        this.propagation = propagation;
     }
 
     /**
@@ -73,7 +73,7 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
             throw new RuntimeException("Neural network should be provided for the fitness evaluation.");
         }
 
-        if (train == null) {
+        if (propagation == null) {
             throw new RuntimeException("Training object should be provided for the fitness evaluation.");
         }
 
@@ -94,12 +94,12 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
         /*
          * Iterate over the training set in order to calculate network error.
          */
-        train.iteration();
+        propagation.iteration();
 
         /*
          * Total ANN error is used as fitness value. The bigger the fitness, the better the chromosome.
          */
-        solution.setObjective(0, -train.getError());
+        solution.setObjective(0, -propagation.getError());
     }
 
     /**

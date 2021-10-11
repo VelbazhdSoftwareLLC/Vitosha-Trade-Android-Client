@@ -13,6 +13,7 @@ import org.encog.ml.data.market.TickerSymbol;
 import org.encog.ml.data.market.loader.LoadedMarketData;
 import org.encog.ml.data.market.loader.MarketLoader;
 import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.networks.ContainsFlat;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
@@ -292,13 +293,28 @@ public class Predictor {
 
         /* Select a random gradient-based training. */
         Propagation[] propagations = {
-                new Backpropagation(network, examples),
-                new ResilientPropagation(network, examples),
-                new QuickPropagation(network, examples),
-                new ScaledConjugateGradient(network, examples),
-                new ManhattanPropagation(network, examples, PRNG.nextDouble())
+                //TODO Cloning is not needed in real-time operational mode.
+                new Backpropagation((ContainsFlat) network.clone(), examples),
+                new ResilientPropagation((ContainsFlat) network.clone(), examples),
+                new QuickPropagation((ContainsFlat) network.clone(), examples),
+                new ScaledConjugateGradient((ContainsFlat) network.clone(), examples),
+                new ManhattanPropagation((ContainsFlat) network.clone(), examples, PRNG.nextDouble())
         };
         propagation = propagations[PRNG.nextInt(propagations.length)];
+System.out.println("Experiment start.");
+for(Propagation p : propagations) {
+    System.out.println(""+p.getClass().getName());
+    long start = System.currentTimeMillis();
+    for(int c=0; c<10; c++) {
+        while (System.currentTimeMillis() - start < 600000) {
+            p.iteration();
+        }
+        System.out.println(""+p.getError());
+    }
+    p.finishTraining();
+}
+System.out.println("Experiment end.");
+if(true)return;
 
         /*
          * Switch between backpropagation and genetic algorithm.
