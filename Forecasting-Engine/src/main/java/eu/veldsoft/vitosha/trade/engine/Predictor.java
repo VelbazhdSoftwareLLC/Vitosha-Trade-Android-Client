@@ -293,34 +293,13 @@ public class Predictor {
 
         /* Select a random gradient-based training. */
         Propagation[] propagations = {
-                //TODO Cloning is not needed in real-time operational mode.
-                new Backpropagation((BasicNetwork) network.clone(), examples),
-                new ResilientPropagation((BasicNetwork) network.clone(), examples),
-                new QuickPropagation((BasicNetwork) network.clone(), examples),
-                new ScaledConjugateGradient((BasicNetwork) network.clone(), examples),
-                new ManhattanPropagation((BasicNetwork) network.clone(), examples, PRNG.nextDouble())
+                new Backpropagation((BasicNetwork) network, examples),
+                new ResilientPropagation((BasicNetwork) network, examples),
+                new QuickPropagation((BasicNetwork) network, examples),
+                new ScaledConjugateGradient((BasicNetwork) network, examples),
+                new ManhattanPropagation((BasicNetwork) network, examples, PRNG.nextDouble())
         };
         propagation = propagations[PRNG.nextInt(propagations.length)];
-System.out.println("Experiment start.");
-for (Propagation p : propagations) {
-    System.out.println("" + p.getClass().getName());
-    long loop = 0;
-    long second = 0;
-    long time = System.currentTimeMillis();
-    long start = System.currentTimeMillis();
-    while (p.isTrainingDone() == false && System.currentTimeMillis()-start < 1*60*1000) {
-        loop++;
-        p.iteration();
-        if(System.currentTimeMillis()-time > 1000) {
-            second++;
-            System.out.println(second + "\t" + loop + "\t" + p.getError());
-            time = System.currentTimeMillis();
-        }
-    }
-    p.finishTraining();
-}
-System.out.println("Experiment end.");
-if(true)return;
 
         /*
          * Switch between backpropagation and genetic algorithm.
