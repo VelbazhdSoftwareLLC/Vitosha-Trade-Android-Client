@@ -97,9 +97,10 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
         propagation.iteration();
 
         /*
-         * Total ANN error is used as fitness value. The bigger the fitness, the better the chromosome.
+         * Total ANN error is used as fitness value. The bigger the fitness, the better the
+         * chromosome. If the error go to zero it can lead to division by zero run-time exception.
          */
-        solution.setObjective(0, -propagation.getError());
+        solution.setObjective(0, propagation.getError());
     }
 
     /**

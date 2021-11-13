@@ -27,7 +27,7 @@ public class ConsolePredictor {
         predictor.train();
         double[] forecast = predictor.predict();
 
-        System.out.println(Arrays.toString(forecast) );
+        //System.out.println(Arrays.toString(forecast) );
 
         System.exit(0);
     }

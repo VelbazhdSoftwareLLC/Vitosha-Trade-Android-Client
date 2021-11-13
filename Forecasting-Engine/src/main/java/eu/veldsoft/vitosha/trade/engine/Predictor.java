@@ -13,7 +13,6 @@ import org.encog.ml.data.market.TickerSymbol;
 import org.encog.ml.data.market.loader.LoadedMarketData;
 import org.encog.ml.data.market.loader.MarketLoader;
 import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.ContainsFlat;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
@@ -57,7 +56,7 @@ public class Predictor {
     /**
      * Colors used in the charts.
      */
-    private static final int CHART_COLORS[] = {
+    private static final int []CHART_COLORS = {
             (95 << 24 | 0 << 16 | 255 << 8 | 0),
             (95 << 24 | 255 << 16 | 0 << 8 | 0),
     };
@@ -65,7 +64,7 @@ public class Predictor {
     /**
      * Colors used to visualize neural networks.
      */
-    private static final int ANN_COLORS[] = {
+    private static final int []ANN_COLORS = {
             (95 << 24 | 0 << 16 | 255 << 8 | 0),
             (95 << 24 | 255 << 16 | 255 << 8 | 255),
             (95 << 24 | 0 << 16 | 0 << 8 | 255),
@@ -94,11 +93,6 @@ public class Predictor {
     private static MLData output = null;
 
     /**
-     * Training rule object.
-     */
-    private static Propagation propagation = null;
-
-    /**
      * Lowest and highest values of particular activation function. It is used for time series scaling.
      *
      * @param activation Activation function object.
@@ -108,7 +102,7 @@ public class Predictor {
         /*
          * Use range of double values.
          */
-        double check[] = {
+        double[] check = {
                 Double.MIN_VALUE, -0.000001, -0.00001, -0.0001,
                 -0.001, -0.01, -0.1, -1, -10, -100, -1000,
                 -10000, -100000, -1000000, 0, 0.000001, 0.00001,
@@ -121,7 +115,7 @@ public class Predictor {
         activation.activationFunction(check, 0, check.length);
 
         /*
-         * Soft the result of the activation fuction output.
+         * Soft the result of the activation function output.
          */
         Arrays.sort(check);
 
@@ -135,7 +129,7 @@ public class Predictor {
      * Initialize common class members.
      */
     public void initialize() {
-        Map<NeuronType, Integer> counters = new HashMap<NeuronType, Integer>();
+        Map<NeuronType, Integer> counters = new HashMap<>();
         counters.put(NeuronType.REGULAR, 0);
         counters.put(NeuronType.BIAS, 0);
         counters.put(NeuronType.INPUT, 0);
@@ -164,7 +158,7 @@ public class Predictor {
 
         // TODO Load weights to the network.
 
-        double values[] = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
+        double []values = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
 
         /*
          * Data construction.
@@ -175,7 +169,7 @@ public class Predictor {
                                                      Set<MarketDataType> types, Date start,
                                                      Date end) {
                 Collection<LoadedMarketData> result = new
-                        ArrayList<LoadedMarketData>();
+                        ArrayList<>();
 
                 for (int i = 0; i < InputData.TIME.length; i++) {
                     /*
@@ -236,7 +230,7 @@ public class Predictor {
          *
          * The fist layer has no activation function.
          */
-        double range[] = findLowAndHigh(network.getActivation(2));
+        double[] range = findLowAndHigh(network.getActivation(2));
 
         /*
          * Use only half of the range. It is done just to provide buffer above the central line and
@@ -253,9 +247,9 @@ public class Predictor {
         /*
          * Prepare training set.
          */
-        double input[][] = new double[values.length -
+        double[][] input = new double[values.length -
                 (inputSize + outputSize)][inputSize];
-        double target[][] = new double[values.length -
+        double[][] target = new double[values.length -
                 (inputSize + outputSize)][outputSize];
         for (int i = 0; i < values.length - (inputSize + outputSize); i++) {
             for (int j = 0; j < inputSize; j++) {
@@ -299,51 +293,57 @@ public class Predictor {
                 new ScaledConjugateGradient((BasicNetwork) network, examples),
                 new ManhattanPropagation((BasicNetwork) network, examples, PRNG.nextDouble())
         };
-        propagation = propagations[PRNG.nextInt(propagations.length)];
+
+
+        /* Training rule object. */
+        Propagation propagation = propagations[PRNG.nextInt(propagations.length)];
 
         /*
-         * Switch between backpropagation and genetic algorithm.
+         * Switch between gradient methods and evolutionary methods.
          */
-        if (PRNG.nextBoolean() == true) {
-            propagation.iteration();
-            propagation.finishTraining();
-        } else {
-            int populationSize = 4 + PRNG.nextInt(33);
-            double elitismRate = PRNG.nextInt(100) / 1000D;
-            double crossoverRate = PRNG.nextInt(900) / 1000D;
-            double mutationRate = PRNG.nextInt(10) / 1000D;
-            int tournamentArity = PRNG.nextBoolean() ? 1 : 2;
-            double scalingFactor = PRNG.nextInt(500) / 1000D;
-            long optimizationTimeout = 1000;
+        switch (PRNG.nextInt(2) + 1) {
+            case 1:
+                propagation.iteration();
+                propagation.finishTraining();
+                break;
+            case 2:
+                int populationSize = 4 + PRNG.nextInt(33);
+                double elitismRate = PRNG.nextInt(100) / 1000D;
+                double crossoverRate = PRNG.nextInt(900) / 1000D;
+                double mutationRate = PRNG.nextInt(10) / 1000D;
+                int tournamentArity = PRNG.nextBoolean() ? 1 : 2;
+                double scalingFactor = PRNG.nextInt(500) / 1000D;
+                long optimizationTimeout = 60000;
 
-            /*
-             * Obtain ANN weights.
-             */
-            List<Double> weights = new ArrayList<Double>();
-            for (int layer = 0; layer < network.getLayerCount() - 1; layer++) {
-                int bias = network.isLayerBiased(layer) ? 1 : 0;
-                for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
-                    for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++) {
-                        weights.add(network.getWeight(layer, from, to));
+                /*
+                 * Obtain ANN weights.
+                 */
+                List<Double> weights = new ArrayList<>();
+                for (int layer = 0; layer < network.getLayerCount() - 1; layer++) {
+                    int bias = network.isLayerBiased(layer) ? 1 : 0;
+                    for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
+                        for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++) {
+                            weights.add(network.getWeight(layer, from, to));
+                        }
                     }
                 }
-            }
 
-            /* Do evolutionary optimization. */
-            Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor);
-            weights = optimizer.optimize(weights);
+                /* Do evolutionary optimization. */
+                Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor);
+                weights = optimizer.optimize(weights);
 
-            /*
-             * Replace ANN weights.
-             */
-            for (int layer = 0, index = 0; layer < network.getLayerCount() - 1; layer++) {
-                int bias = network.isLayerBiased(layer) ? 1 : 0;
-                for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
-                    for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++, index++) {
-                        network.setWeight(layer, from, to, weights.get(index));
+                /*
+                 * Replace ANN weights.
+                 */
+                for (int layer = 0, index = 0; layer < network.getLayerCount() - 1; layer++) {
+                    int bias = network.isLayerBiased(layer) ? 1 : 0;
+                    for (int from = 0; from < network.getLayerNeuronCount(layer) + bias; from++) {
+                        for (int to = 0; to < network.getLayerNeuronCount(layer + 1); to++, index++) {
+                            network.setWeight(layer, from, to, weights.get(index));
+                        }
                     }
                 }
-            }
+            break;
         }
     }
 
@@ -387,7 +387,7 @@ public class Predictor {
          * Output layer activation function is used because input layer
          * has no activation function.
          */
-        double range[] = findLowAndHigh(network.getActivation(2));
+        double[] range = findLowAndHigh(network.getActivation(2));
 
         /*
          * Total number of values to be visualized.
@@ -396,7 +396,7 @@ public class Predictor {
                 network.getLayerNeuronCount(2);
 
         int x = 0;
-        int y = 0;
+        int y;
 
         /*
          * Visualize past data.
@@ -450,7 +450,7 @@ public class Predictor {
         /*
          * Artificial neural network.
          */
-        double topology[][] = {
+        double[][] topology = {
                 forecast.getData(),
                 new double[network.getLayerNeuronCount(0) *
                         network.getLayerNeuronCount(1)],
@@ -469,7 +469,7 @@ public class Predictor {
          *
          * The fist layer has no activation function.
          */
-        double range[] = findLowAndHigh(network.getActivation(2));
+        double[] range = findLowAndHigh(network.getActivation(2));
 
         /*
          * Scale input layer data.

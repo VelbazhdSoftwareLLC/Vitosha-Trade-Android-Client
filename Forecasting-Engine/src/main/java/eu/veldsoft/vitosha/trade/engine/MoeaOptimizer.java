@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import eu.veldsoft.vitosha.trade.dummy.InputData;
+
 /**
  * MOEA Framework based optimizer.
  *
@@ -105,7 +107,7 @@ public class MoeaOptimizer implements Optimizer {
     public List<Double> optimize(List<Double> weights) {
         Problem problem = new AnnErrorMinimizationProblem(weights, network, propagation);
 
-        List<Solution> solutions = new ArrayList<Solution>();
+        List<Solution> solutions = new ArrayList<>();
         for (int i = 0; i < populationSize; i++) {
             Solution solution = problem.newSolution();
             solutions.add(solution);
