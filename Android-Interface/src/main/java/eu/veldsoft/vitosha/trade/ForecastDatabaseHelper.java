@@ -14,28 +14,27 @@ import java.util.logging.Logger;
  */
 class ForecastDatabaseHelper extends SQLiteOpenHelper {
     /**
-     * Logger instance.
+     * Database integer version.
      */
-    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
-
-    /** Database integer version. */
     public static final int DATABASE_VERSION = 1;
-
-    /** Database file name. */
+    /**
+     * Database file name.
+     */
     public static final String DATABASE_NAME = "Forecast.db";
-
     /**
      * Drop rates table SQL pattern.
      */
     static final String SQL_DELETE_RATES = "DROP TABLE IF EXISTS "
             + RatesColumns.TABLE_NAME;
-
     /**
      * Drop rates table SQL pattern.
      */
     static final String SQL_DELETE_ANNS = "DROP TABLE IF EXISTS "
             + ANNsColumns.TABLE_NAME;
-
+    /**
+     * Logger instance.
+     */
+    private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
     /**
      * Create rates table SQL patter.
      */

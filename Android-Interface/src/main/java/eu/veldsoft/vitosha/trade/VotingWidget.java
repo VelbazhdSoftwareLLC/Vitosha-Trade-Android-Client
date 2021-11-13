@@ -23,9 +23,9 @@ public class VotingWidget extends AppWidgetProvider {
     /**
      * Update widget information.
      *
-     * @param context Widget context.
+     * @param context          Widget context.
      * @param appWidgetManager Widget manager.
-     * @param appWidgetId Widget identifier.
+     * @param appWidgetId      Widget identifier.
      */
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -37,7 +37,7 @@ public class VotingWidget extends AppWidgetProvider {
 
         //TODO Information should be taken from other source.
         views.setTextViewText(R.id.symbol_ticker, InputData.SYMBOL);
-        views.setTextViewText(R.id.current_value, ""+InputData.OPEN[InputData.OPEN.length-1]);
+        views.setTextViewText(R.id.current_value, "" + InputData.OPEN[InputData.OPEN.length - 1]);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }

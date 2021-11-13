@@ -22,19 +22,29 @@ public class VotingWidgetConfigureActivity extends Activity {
      */
     private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
 
-    /** Default remote server URL. */
+    /**
+     * Default remote server URL.
+     */
     private static final String PREFS_NAME = "eu.veldsoft.vitosha.trade.VotingWidget";
 
-    /** Preferences key prefix. */
+    /**
+     * Preferences key prefix.
+     */
     private static final String PREF_PREFIX_KEY = "appwidget_";
 
-    /** Widget identifier. */
+    /**
+     * Widget identifier.
+     */
     private int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
-    /** Widget text. */
+    /**
+     * Widget text.
+     */
     private EditText widgetText;
 
-    /** On click event handler. */
+    /**
+     * On click event handler.
+     */
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         /**
          * On click event.
@@ -67,9 +77,9 @@ public class VotingWidgetConfigureActivity extends Activity {
     /**
      * Save preferences title.
      *
-     * @param context Preferences context.
+     * @param context  Preferences context.
      * @param widgetId Widget identifier.
-     * @param text Title text.
+     * @param text     Title text.
      */
     static void saveTitlePref(Context context, int widgetId, String text) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
@@ -80,7 +90,7 @@ public class VotingWidgetConfigureActivity extends Activity {
     /**
      * Load preferences title.
      *
-     * @param context Preferences context.
+     * @param context  Preferences context.
      * @param widgetId Widget identifier.
      * @return Title text.
      */
@@ -97,7 +107,7 @@ public class VotingWidgetConfigureActivity extends Activity {
     /**
      * Delete preferences title.
      *
-     * @param context Preferences context.
+     * @param context  Preferences context.
      * @param widgetId Widget identifier.
      */
     static void deleteTitlePref(Context context, int widgetId) {

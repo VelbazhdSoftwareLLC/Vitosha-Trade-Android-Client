@@ -285,7 +285,7 @@ public class ProgressReportingWallpaperService extends WallpaperService {
             int[] pixels = new int[width * height];
             predictor.drawForecast(pixels, width, height);
             Bitmap bitmap = Bitmap.createBitmap(pixels, 0, stride, width, height, Bitmap.Config.ARGB_8888);
-            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[1], paint);
+            canvas.drawBitmap(bitmap, new Rect(0, 0, width, height), panels[1], paint);
         }
 
         /**
@@ -301,7 +301,7 @@ public class ProgressReportingWallpaperService extends WallpaperService {
             int[] pixels = new int[width * height];
             predictor.drawAnn(pixels, width, height);
             Bitmap bitmap = Bitmap.createBitmap(pixels, 0, stride, width, height, Bitmap.Config.ARGB_8888);
-            canvas.drawBitmap(bitmap, new Rect(0,0,width,height), panels[2], paint);
+            canvas.drawBitmap(bitmap, new Rect(0, 0, width, height), panels[2], paint);
         }
 
         /**
