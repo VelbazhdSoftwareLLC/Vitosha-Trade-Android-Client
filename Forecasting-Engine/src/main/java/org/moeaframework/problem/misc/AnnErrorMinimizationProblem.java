@@ -8,6 +8,7 @@ import org.moeaframework.core.variable.RealVariable;
 import org.moeaframework.problem.AbstractProblem;
 
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -20,6 +21,11 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
      * Logger instance.
      */
     private static final Logger LOGGER = Logger.getLogger(Thread.currentThread().getStackTrace()[0].getClassName());
+
+    /**
+     * Pseudo-random number generator.
+     */
+    private static final Random PRNG = new Random();
 
     /**
      * Artificial neural network reference.
@@ -110,7 +116,8 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
     public Solution newSolution() {
         Solution solution = new Solution(initial.size(), 1, 0);
         for (int i = 0; i < initial.size(); i++) {
-            solution.setVariable(i, new RealVariable(initial.get(i), -Double.MAX_VALUE + 1, Double.MAX_VALUE - 1));
+            /* Without random noise, some of the population-based optimizers do not perform at all. */
+            solution.setVariable(i, new RealVariable(initial.get(i)+PRNG.nextDouble()-0.5D, -Double.MAX_VALUE + 1, Double.MAX_VALUE - 1));
         }
         return solution;
     }
