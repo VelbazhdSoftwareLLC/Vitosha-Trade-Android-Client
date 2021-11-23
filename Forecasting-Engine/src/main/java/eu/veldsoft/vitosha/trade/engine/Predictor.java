@@ -56,7 +56,7 @@ public class Predictor {
     /**
      * Colors used in the charts.
      */
-    private static final int []CHART_COLORS = {
+    private static final int[] CHART_COLORS = {
             (95 << 24 | 0 << 16 | 255 << 8 | 0),
             (95 << 24 | 255 << 16 | 0 << 8 | 0),
     };
@@ -64,7 +64,7 @@ public class Predictor {
     /**
      * Colors used to visualize neural networks.
      */
-    private static final int []ANN_COLORS = {
+    private static final int[] ANN_COLORS = {
             (95 << 24 | 0 << 16 | 255 << 8 | 0),
             (95 << 24 | 255 << 16 | 255 << 8 | 255),
             (95 << 24 | 0 << 16 | 0 << 8 | 255),
@@ -158,7 +158,7 @@ public class Predictor {
 
         // TODO Load weights to the network.
 
-        double []values = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
+        double[] values = InputData.RATES[PRNG.nextInt(InputData.RATES.length)];
 
         /*
          * Data construction.
@@ -343,7 +343,7 @@ public class Predictor {
                         }
                     }
                 }
-            break;
+                break;
         }
     }
 

@@ -1,7 +1,5 @@
-package  org.encog.engine.network.activation;
+package org.encog.engine.network.activation;
 
-import org.encog.engine.network.activation.ActivationFunction;
-import org.encog.engine.network.activation.ActivationSIN;
 import org.encog.mathutil.BoundMath;
 
 /**
@@ -10,107 +8,112 @@ import org.encog.mathutil.BoundMath;
  * @author Todor Balabanov
  */
 public class ActivationExponentRegulatedSin implements ActivationFunction {
-	/** Original sin activation function. */
-	private final ActivationSIN SIN = new ActivationSIN();
+    /**
+     * Default lowest value.
+     */
+    static final double LOW = -0.99;
+    /**
+     * Default highest value.
+     */
+    static final double HIGH = +0.99;
+    /**
+     * Original sin activation function.
+     */
+    private final ActivationSIN SIN = new ActivationSIN();
+    /**
+     * Sin function period.
+     */
+    private double period = 1.0D;
 
-	/** Sin function period. */
-	private double period = 1.0D;
+    /**
+     * Constructor with parameters.
+     *
+     * @param period Sin function period.
+     */
+    public ActivationExponentRegulatedSin(double period) {
+        this.period = period;
+    }
 
-	/** Default lowest value. */
-	static final double LOW = -0.99;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void activationFunction(double[] values, int start, int size) {
+        for (int i = start; i < (start + size) && i < values.length; i++) {
+            double x = values[i] / period;
 
-	/** Default highest value. */
-	static final double HIGH = +0.99;
+            values[i] = Math.PI * BoundMath.sin(x) / BoundMath.exp(Math.abs(x));
+        }
+    }
 
-	/**
-	 * Constructor with parameters.
-	 *
-	 * @param period Sin function period.
-	 */
-	public ActivationExponentRegulatedSin(double period) {
-		this.period = period;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public double derivativeFunction(double before, double after) {
+        double x = before / period;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void activationFunction(double[] values, int start, int size) {
-		for (int i = start; i < (start + size) && i < values.length; i++) {
-			double x = values[i] / period;
+        if (x == 0) {
+            return Double.MAX_VALUE;
+        }
 
-			values[i] = Math.PI * BoundMath.sin(x) / BoundMath.exp(Math.abs(x));
-		}
-	}
+        return Math.PI * BoundMath.exp(-Math.abs(x)) * (BoundMath.cos(x) * Math.abs(x) - x * BoundMath.sin(x))
+                / Math.abs(x);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public double derivativeFunction(double before, double after) {
-		double x = before / period;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActivationFunction clone() {
+        return new ActivationExponentRegulatedSin(period);
+    }
 
-		if (x == 0) {
-			return Double.MAX_VALUE;
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getFactoryCode() {
+        return null;
+    }
 
-		return Math.PI * BoundMath.exp(-Math.abs(x)) * (BoundMath.cos(x) * Math.abs(x) - x * BoundMath.sin(x))
-				/ Math.abs(x);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLabel() {
+        return null;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ActivationFunction clone() {
-		return new ActivationExponentRegulatedSin(period);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String[] getParamNames() {
+        return SIN.getParamNames();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getFactoryCode() {
-		return null;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public double[] getParams() {
+        return SIN.getParams();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getLabel() {
-		return null;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasDerivative() {
+        return true;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String[] getParamNames() {
-		return SIN.getParamNames();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public double[] getParams() {
-		return SIN.getParams();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean hasDerivative() {
-		return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setParam(int index, double value) {
-		SIN.setParam(index, value);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParam(int index, double value) {
+        SIN.setParam(index, value);
+    }
 }

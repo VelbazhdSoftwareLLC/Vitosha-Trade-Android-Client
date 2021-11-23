@@ -1,6 +1,5 @@
 package eu.veldsoft.vitosha.trade;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import eu.veldsoft.vitosha.trade.engine.Predictor;

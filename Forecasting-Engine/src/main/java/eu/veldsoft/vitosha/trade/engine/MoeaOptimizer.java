@@ -15,12 +15,14 @@ import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Selection;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variation;
 import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.InjectedInitialization;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.core.operator.UniformCrossover;
 import org.moeaframework.core.operator.UniformSelection;
-import org.moeaframework.core.operator.permutation.Insertion;
+import org.moeaframework.core.operator.binary.BitFlip;
+import org.moeaframework.core.operator.binary.HUX;
 import org.moeaframework.core.operator.real.DifferentialEvolutionSelection;
 import org.moeaframework.core.operator.real.DifferentialEvolutionVariation;
 import org.moeaframework.core.operator.real.UM;
@@ -30,8 +32,6 @@ import org.moeaframework.problem.misc.AnnErrorMinimizationProblem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import eu.veldsoft.vitosha.trade.dummy.InputData;
 
 /**
  * MOEA Framework based optimizer.
@@ -83,12 +83,12 @@ public class MoeaOptimizer implements Optimizer {
      * Constructor with all parameters.
      *
      * @param optimizationTimeout Optimization time.
-     * @param network Artificial neural network reference.
-     * @param propagation Training rule reference.
-     * @param populationSize Evolutionary algorithm population size.
-     * @param crossoverRate Crossover rate.
-     * @param mutationRate Mutation rate.
-     * @param scalingFactor Differential evolution scaling factor.
+     * @param network             Artificial neural network reference.
+     * @param propagation         Training rule reference.
+     * @param populationSize      Evolutionary algorithm population size.
+     * @param crossoverRate       Crossover rate.
+     * @param mutationRate        Mutation rate.
+     * @param scalingFactor       Differential evolution scaling factor.
      */
     public MoeaOptimizer(long optimizationTimeout, BasicNetwork network, Propagation propagation, int populationSize, double crossoverRate, double mutationRate, double scalingFactor) {
         this.optimizationTimeout = optimizationTimeout;
@@ -117,13 +117,15 @@ public class MoeaOptimizer implements Optimizer {
         Initialization initialization = new InjectedInitialization(problem, populationSize, solutions);
 
         /* Select a random evolutionary optimizer. */
-        Selection[] selections = {new TournamentSelection(), new UniformSelection()};
+        Selection[] selections = {new TournamentSelection(), new UniformSelection(), new DifferentialEvolutionSelection(),};
+        Variation[] crossovers = {new UniformCrossover(crossoverRate), new HUX(crossoverRate),};
+        Variation[] mutations = {new BitFlip(mutationRate), new UM(mutationRate),};
         AbstractAlgorithm[] algorithms = {
                 new EvolutionStrategy(problem, comparator, initialization,
                         new SelfAdaptiveNormalVariation()),
                 new GeneticAlgorithm(problem, comparator, initialization,
                         selections[PRNG.nextInt(selections.length)],
-                        new GAVariation(new UniformCrossover(crossoverRate), new Insertion(mutationRate))),
+                        new GAVariation(crossovers[PRNG.nextInt(crossovers.length)], mutations[PRNG.nextInt(mutations.length)])),
                 new DifferentialEvolution(problem, comparator, initialization,
                         new DifferentialEvolutionSelection(),
                         new DifferentialEvolutionVariation(crossoverRate, scalingFactor))

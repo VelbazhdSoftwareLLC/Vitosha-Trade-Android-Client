@@ -45,8 +45,8 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
     /**
      * Constructor with all parameters.
      *
-     * @param solution Initial weights.
-     * @param network Artificial neural network reference.
+     * @param solution    Initial weights.
+     * @param network     Artificial neural network reference.
      * @param propagation Training rule reference.
      */
     public AnnErrorMinimizationProblem(List<Double> solution, BasicNetwork network, Propagation propagation) {
@@ -117,7 +117,7 @@ public class AnnErrorMinimizationProblem extends AbstractProblem {
         Solution solution = new Solution(initial.size(), 1, 0);
         for (int i = 0; i < initial.size(); i++) {
             /* Without random noise, some of the population-based optimizers do not perform at all. */
-            solution.setVariable(i, new RealVariable(initial.get(i)+PRNG.nextDouble()-0.5D, -Double.MAX_VALUE + 1, Double.MAX_VALUE - 1));
+            solution.setVariable(i, new RealVariable(initial.get(i) + PRNG.nextDouble() - 0.5D, -(Double.MAX_VALUE / 2D), +(Double.MAX_VALUE / 2D)));
         }
         return solution;
     }

@@ -71,13 +71,13 @@ public class ApacheOptimizer implements Optimizer {
      * Constructor with all parameters.
      *
      * @param optimizationTimeout Optimization time.
-     * @param network Artificial neural network reference.
-     * @param propagation Training rule reference.
-     * @param populationSize Evolutionary algorithm population size.
-     * @param tournamentArity Tournament selection arity.
-     * @param crossoverRate Crossover rate.
-     * @param mutationRate Mutation rate.
-     * @param elitismRate Elitism rate.
+     * @param network             Artificial neural network reference.
+     * @param propagation         Training rule reference.
+     * @param populationSize      Evolutionary algorithm population size.
+     * @param tournamentArity     Tournament selection arity.
+     * @param crossoverRate       Crossover rate.
+     * @param mutationRate        Mutation rate.
+     * @param elitismRate         Elitism rate.
      */
     public ApacheOptimizer(long optimizationTimeout, BasicNetwork network, Propagation propagation, int populationSize, int tournamentArity, double crossoverRate, double mutationRate, double elitismRate) {
         this.optimizationTimeout = optimizationTimeout;
