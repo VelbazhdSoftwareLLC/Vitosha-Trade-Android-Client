@@ -291,9 +291,8 @@ public class Predictor {
                 new ResilientPropagation((BasicNetwork) network, examples),
                 new QuickPropagation((BasicNetwork) network, examples),
                 new ScaledConjugateGradient((BasicNetwork) network, examples),
-                new ManhattanPropagation((BasicNetwork) network, examples, PRNG.nextDouble())
+                new ManhattanPropagation((BasicNetwork) network, examples, PRNG.nextDouble()),
         };
-
 
         /* Training rule object. */
         Propagation propagation = propagations[PRNG.nextInt(propagations.length)];
@@ -328,8 +327,16 @@ public class Predictor {
                     }
                 }
 
+                /* Select a random metha-heuristics optimizer. */
+                Optimizer[] optimizers = {
+                        new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor),
+                        new JeneticsOptimizer(),
+                };
+
+                /* Optimizer object. */
+                Optimizer optimizer = optimizers[PRNG.nextInt(optimizers.length)];
+
                 /* Do evolutionary optimization. */
-                Optimizer optimizer = new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor);
                 weights = optimizer.optimize(weights);
 
                 /*
