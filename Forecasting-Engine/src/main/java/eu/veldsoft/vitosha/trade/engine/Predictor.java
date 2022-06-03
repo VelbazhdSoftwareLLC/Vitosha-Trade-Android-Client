@@ -330,7 +330,7 @@ public class Predictor {
                 /* Select a random metha-heuristics optimizer. */
                 Optimizer[] optimizers = {
                         new MoeaOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate, scalingFactor),
-                        new JeneticsOptimizer(),
+                        new JeneticsOptimizer(optimizationTimeout, network, propagation, populationSize, crossoverRate, mutationRate),
                 };
 
                 /* Optimizer object. */
