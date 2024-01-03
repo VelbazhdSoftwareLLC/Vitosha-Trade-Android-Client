@@ -1,9 +1,0 @@
-- Add option to activate the application as widget or as wallpaper.
-
-- Separate wallpaper service as calculating service and visualisation service.
-
-- Add possibility user to mark his guess for a forecasting and collect this information on the server. Some users can be very successful in the guessing of the price movements.
-
-- Use sine function with very wide period as neuron's activation function instead of the sigmoid function. The cosine is the derivative of the sine and back propagation can be used for the training.
-
-- On some regular basis multiply all weights by 1/100. By this way ANN will cool down and it will proceed training.
